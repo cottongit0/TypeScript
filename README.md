@@ -31,6 +31,9 @@ https://www.typescriptlang.org/
 1. Watch 모드 <br/>
    tsc fileName.ts
 
+1. Terminal 컴파일 <br/>
+   ts-node fileName.ts
+
 ---
 
 ## 기본 - 들어가기 전
