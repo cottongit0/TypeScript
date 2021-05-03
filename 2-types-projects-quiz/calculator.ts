@@ -2,8 +2,10 @@
  * Let's make a calculator 🧮
  */
 
-function calculate(calc: string, num1: number, num2: number): number {
-  switch (calc) {
+type command = "add" | "substract" | "multiply" | "divide" | "remainder";
+
+function calculate(command: command, num1: number, num2: number): number {
+  switch (command) {
     case "add":
       return num1 + num2;
     case "substract":
@@ -14,6 +16,8 @@ function calculate(calc: string, num1: number, num2: number): number {
       return num1 / num2;
     case "remainder":
       return num1 % num2;
+    default:
+      throw Error("Unknown Command");
   }
 }
 
