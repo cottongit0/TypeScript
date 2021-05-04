@@ -29,7 +29,10 @@
         console.log(`${login.reason}`);
         break;
       case "loading":
-        console.log(`${login.state}`);
+        console.log(`👀 ${login.state}...`);
+        break;
+      default:
+        throw new Error("ERROR!");
     }
   }
 
