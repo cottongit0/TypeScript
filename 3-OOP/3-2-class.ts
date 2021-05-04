@@ -1,32 +1,28 @@
 {
-  class CoffeeCup {
+  type CoffeeCup = {
     shots: number;
     hasMilk: boolean;
+  };
+
+  class CoffeeMaker {
+    static BEANS_GRAM_PER_SHOT: number = 7;
     coffeeBeans: number;
-    constructor() {
-      this.shots;
-      this.hasMilk;
-      this.coffeeBeans = 0;
+
+    constructor(coffeeBeans: number) {
+      this.coffeeBeans = coffeeBeans;
     }
-    addCoffeeBeans(beans) {
-      beans *= BEANS_GRAM_PER_SHOT;
-      this.coffeeBeans = beans;
-      console.log(`커피콩의 개수 ${this.coffeeBeans}`);
-      return this.coffeeBeans;
-    }
-    makeCoffee(shots) {
-      if (this.coffeeBeans < shots * BEANS_GRAM_PER_SHOT) {
-        throw new Error(`커피콩이 부족합니다. ${this.coffeeBeans}`);
+    makeCoffee(shots: number): CoffeeCup {
+      if (this.coffeeBeans < shots * CoffeeMaker.BEANS_GRAM_PER_SHOT) {
+        throw new Error("커피콩이 부족합니다.");
       }
-      this.coffeeBeans -= shots * BEANS_GRAM_PER_SHOT;
-      console.log(`커피 ${shots}잔이 나왔습니다.`);
-      console.log(`남은 커피콩의 개수 ${this.coffeeBeans}`);
+      this.coffeeBeans -= shots * CoffeeMaker.BEANS_GRAM_PER_SHOT;
+      return {
+        shots,
+        hasMilk: false,
+      };
     }
   }
 
-  const BEANS_GRAM_PER_SHOT: number = 7;
-
-  const coffee = new CoffeeCup();
-  console.log(coffee.addCoffeeBeans(10));
+  const coffee = new CoffeeMaker(20);
   console.log(coffee.makeCoffee(2));
 }

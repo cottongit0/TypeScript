@@ -801,7 +801,7 @@ poly는 many, morphy라는 다양한 형태를 말한다. 앞의 예시로 돌�
 
 ---
 
-## OOP - 객체지향 프로그래밍
+## OOP - 커피머신 만들기
 
 ### 절차지향적으로 커피머신 만들기
 
@@ -826,7 +826,7 @@ function makeCoffee(shots: number): CoffeeCup {}
 커피를 만들 때에는 CoffeeBeans도 필요하다. CoffeeBeans의 총량과 샷 한번에 얼만큼의 CoffeeBeans가 필요한지 적혀있어야 한다.
 
 ```ts
-const BEANS_GRAMM_PER_SHOT: number = 7;
+const BEANS_GRAM_PER_SHOT: number = 7;
 let coffeeBeans: number = 0;
 ```
 
@@ -834,7 +834,7 @@ let coffeeBeans: number = 0;
 
 ```ts
 function makeCoffee(shots:number):CoffeeCup{
-  if(coffeeBeans < shots * BEANS_GRAMM_PER_SHOT){
+  if(coffeeBeans < shots * BEANS_GRAM_PER_SHOT){
     throw new Error("커피콩이 부족합니다!");
   }
   return {
@@ -847,7 +847,7 @@ function makeCoffee(shots:number):CoffeeCup{
 이제 makeCoffee를 호출해보자. 함수를 호출하려고 하면 오류가 발생할 것이다. 위에서 우리는 coffeeBeans의 개수를 0으로 설정했기 때문이다. coffeeBeans의 수량을 늘려야 한다. 샷 3개를 뽑을 수 있을만큼 coffeeBeans의 개수를 설정하고 커피 2개를 뽑아보자.
 
 ```ts
-coffeeBeans += 3 * BEANS_GRAMM_PER_SHOT;
+coffeeBeans += 3 * BEANS_GRAM_PER_SHOT;
 const coffee = makeCoffee(2);
 console.log(coffee);
 ```
@@ -856,8 +856,141 @@ console.log(coffee);
 
 절차지향적 프로그래밍을 하면서 불편한 사항들이 있을 것이다. 필요한 상수와 데이터 함수들 이 모든 것들이 밖에서 나뒹굴고 있다. 이를 개선하기 위해 이제부터 객체지향적 프로그래밍을 통해 이 코드를 개선해볼 것이다.
 
+```ts
+type CoffeeCup = {
+  shots: number;
+  hasMilk: boolean;
+};
+
+const BEANS_GRAM_PER_SHOT: number = 7;
+let coffeeBeans: number = 0;
+
+function makeCoffee(shots: number): CoffeeCup {
+  if (coffeeBeans < shots * BEANS_GRAM_PER_SHOT) {
+    throw new Error("커피콩이 부족합니다.");
+  }
+  coffeeBeans -= shots * BEANS_GRAM_PER_SHOT;
+  return {
+    shots,
+    hasMilk: false,
+  };
+}
+coffeeBeans += 3 * BEANS_GRAM_PER_SHOT;
+const coffee = makeCoffee(2);
+console.log(coffee);
+```
+
 ---
 
 ### 객체지향적으로 커피머신 만들기
 
 OOP를 이용해서 다시 한번 커피머신을 구현해보자. 객체지향이기 때문에 `object`를 이용하여 커피 머신을 만들어야 한다. 그리고 커피머신이라는 `class`를 구현해야 한다. 커피 머신에는 무엇이 필요할까? coffeeBeans라는 프로퍼티가 필요하고 커피를 만들 수 있는 makeCoffee가 필요하다. 커피 머신이라는 클래스를 만들고 이 클래스를 이용한 인스턴트 커피머신이라는 객체를 만들어 커피를 만들어보자.
+
+### Class와 Static
+
+class는 서로 관련있는 데이터와 함수들을 묶는 기능을 한다. class 안에는 커피에 관련된 모든 속성과 함수가 들어가면 된다. 이제부터 타입 아래에 CoffeeMaker라는 class를 생성해보자. class 안에 멤버변수를 작성할 때는 const, let, function 같은 키워드가 필요없다.
+
+```ts
+class CoffeeMaker {
+  BEANS_GRAM_PER_SHOT: number = 7;
+  coffeeBeans: number;
+
+  constructor(coffeeBeans: number) {
+    this.coffeeBeans = coffeeBeans;
+  }
+  makeCoffee(shots: number): CoffeeCup {
+    if (coffeeBeans < shots * CoffeeMaker.BEANS_GRAM_PER_SHOT) {
+      throw new Error("커피콩이 부족합니다.");
+    }
+    coffeeBeans -= shots * CoffeeMaker.BEANS_GRAM_PER_SHOT;
+    return {
+      shots,
+      hasMilk: false,
+    };
+  }
+}
+```
+
+속성으로는 상수가 들어 있고 coffeeBeans라는 속성이 들어있다. 함수 안에는 커피를 만들 수 있는 코드가 있다. class 안에 있는 멤버변수에 접근할 때는 이름을 쓰는 것이 아니라 앞에 `this.`를 붙여 접근한다.
+
+```ts
+class CoffeeMaker {
+  BEANS_GRAM_PER_SHOT: number = 7;
+  coffeeBeans: number;
+
+  makeCoffee(shots: number): CoffeeCup {
+    if (this.coffeeBeans < shots * this.BEANS_GRAM_PER_SHOT) {
+      throw new Error("커피콩이 부족합니다.");
+    }
+    this.coffeeBeans -= shots * this.BEANS_GRAM_PER_SHOT;
+    return {
+      shots,
+      hasMilk: false,
+    };
+  }
+}
+```
+
+CoffeeMaker 안에는 두 가지의 멤버변수가 있고 한 가지의 함수기 있다. class에서 중요한 것은 `constructor`의 사용이다. `constructor`는 클래스를 가지고 object 인스턴스를 만들 때 항상 호출되는 함수이다. 이제 contructor를 만들어보자.
+
+```ts
+class CoffeeMaker {
+  BEANS_GRAM_PER_SHOT: number = 7;
+  coffeeBeans: number;
+
+  constructor() {
+    this.coffeeBeans = coffeeBeans;
+  }
+  //...
+}
+```
+
+이제 class를 이용하여 object를 생성할 수 있다. `new` 라는 것은 클래스의 인스턴스를 만드는 것이다. `()`는 바로 생성자를 호출한다. 즉 `new`와 class 이름을 이용하면 class를 이용해서 데이터를 담을 수 있는 object를 생성할 수 있다.
+
+```ts
+const coffee = new CoffeeMaker();
+```
+
+현재 contructor 생성자는 아무런 인자가 주어지지 않은 상태이다. constructor에서도 인자를 전해줄 수 있다. coffeeBeans를 인자로 전달해보자. 이제는 이 class 안에 있는 coffeeBeans를 전달된 인자만큼 설정해줄 수 있다. coffee를 통해 인자를 전해주면 그만큼 커피콩의 개수가 늘어난다.
+
+```ts
+class CoffeeMaker {
+  BEANS_GRAM_PER_SHOT: number = 7;
+  coffeeBeans: number;
+
+  constructor(coffeeBeans: number) {
+    this.coffeeBeans = coffeeBeans;
+  }
+  //...
+}
+const coffee = new CoffeeMaker(20);
+```
+
+선언된 BEANS_GRAM_PER_SHOT은 class에서 정해진 데이터이다. class 내부에서 연결된 정보이고 변하지 않는 상수이다. 하지만 멤버변수로 작성하게 되면 class를 이용해서 만드는 object마다 BEANS_GRAM_PER_SHOT이 들어가게 된다. class에서 한 번 정의되어지고 이 class를 이용한 object 사이에서 공유될 수 있는 데이터는 멤버변수로 두게되면 중복적으로 데이터를 생성시킨다. 이는 메모리를 낭비시킨다. 이 경우 `static`을 이용해 문제를 해결할 수 있다.
+
+만약 `static`을 붙이지 않는다면 인스턴스 혹은 object라고 불리는 인스턴스 레벨이 된다. class 레벨이라고 하는 것은 class와 연결되어 있기 때문에 object마다 만들어지거나 생성되지 않는다. 이제 `static` 데이터를 사용할 때는 this 키워드가 아닌 `class 이름`을 지정해주어야 한다. 즉, class에 있는 BEANS_GRAM_PER_SHOT 이라는 데이터에 접근하게 되는 것이다. object마다 새로 만들어야 하는 데이터라면 `멤버변수`로, class 레벨에서 함께 공유될 수 있는 것이라면 `static`으로 선언해야 한다.
+
+> static을 사용하는 예제는 다양하다. javascipt에서 'Math' 함수를 이용해 보았을 것이다. 이 Math도 class 레벨에 들어가 있다. 그래서 object를 생성하지 않아도 호출할 수 있다. class 레벨에 있는 함수들은 object를 생성하지 않아도 함수를 호출할 수 있다는 차이점이 있다.
+
+```ts
+class CoffeeMaker {
+  static BEANS_GRAM_PER_SHOT: number = 7;
+  coffeeBeans: number;
+
+  constructor(coffeeBeans: number) {
+    this.coffeeBeans = coffeeBeans;
+  }
+  makeCoffee(shots: number): CoffeeCup {
+    if (this.coffeeBeans < shots * CoffeeMaker.BEANS_GRAM_PER_SHOT) {
+      throw new Error("커피콩이 부족합니다.");
+    }
+    this.coffeeBeans -= shots * CoffeeMaker.BEANS_GRAM_PER_SHOT;
+    return {
+      shots,
+      hasMilk: false,
+    };
+  }
+}
+const coffee = new CoffeeMaker(20);
+console.log(coffee.makeCoffee(2));
+```
