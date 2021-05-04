@@ -801,4 +801,63 @@ poly는 many, morphy라는 다양한 형태를 말한다. 앞의 예시로 돌�
 
 ---
 
-## OOP -
+## OOP - 객체지향 프로그래밍
+
+### 절차지향적으로 커피머신 만들기
+
+객체지향 프로그래밍을 하기 전, `절차지향적`으로 프로그래밍을 해보자. 이제부터 커피머신을 만들 것이다. 커피머신에는 샷과 우유가 들어가며 커피콩이 필요하다. 절차지향적으로 커피머신을 만들기 위해서는 어떻게 해야할까?
+
+먼저 커피를 만들 수 있는 makeCoffee 함수를 구현해야 한다. makeCoffee는 shot의 개수를 받는 함수이다. shots는 number 타입이다.
+
+```ts
+function makeCoffee(shots: number) {}
+```
+
+커피를 만들게 되면 커피를 리턴해야 한다. 리턴할 수 있는 object인 CoffeeCup을 만든다. CoffeeCup에는 shots의 개수와 milk의 여부가 들어간다. 그리고 makeCoffee는 이제부터 CoffeeCup을 반환한다.
+
+```ts
+type CoffeeCup = {
+  shots: number;
+  hasMilk: boolean;
+};
+function makeCoffee(shots: number): CoffeeCup {}
+```
+
+커피를 만들 때에는 CoffeeBeans도 필요하다. CoffeeBeans의 총량과 샷 한번에 얼만큼의 CoffeeBeans가 필요한지 적혀있어야 한다.
+
+```ts
+const BEANS_GRAMM_PER_SHOT: number = 7;
+let coffeeBeans: number = 0;
+```
+
+이제 샷, 우유, 커피콩이 모두 준비되었다. makeCoffee 머신의 내부동작을 만들어보자. makeCoffee는 coffeeBeans가 충분히 모였다면 작동할 수 있다. coffeeBeans가 부족하다면 Error를 리턴하고 충분하다면 CoffeeCup을 리턴한다.
+
+```ts
+function makeCoffee(shots:number):CoffeeCup{
+  if(coffeeBeans < shots * BEANS_GRAMM_PER_SHOT){
+    throw new Error("커피콩이 부족합니다!");
+  }
+  return {
+    shots,
+    hasMilk:false;
+  }
+}
+```
+
+이제 makeCoffee를 호출해보자. 함수를 호출하려고 하면 오류가 발생할 것이다. 위에서 우리는 coffeeBeans의 개수를 0으로 설정했기 때문이다. coffeeBeans의 수량을 늘려야 한다. 샷 3개를 뽑을 수 있을만큼 coffeeBeans의 개수를 설정하고 커피 2개를 뽑아보자.
+
+```ts
+coffeeBeans += 3 * BEANS_GRAMM_PER_SHOT;
+const coffee = makeCoffee(2);
+console.log(coffee);
+```
+
+이제 에러없이 출력되는 것을 확인할 수 있다.
+
+절차지향적 프로그래밍을 하면서 불편한 사항들이 있을 것이다. 필요한 상수와 데이터 함수들 이 모든 것들이 밖에서 나뒹굴고 있다. 이를 개선하기 위해 이제부터 객체지향적 프로그래밍을 통해 이 코드를 개선해볼 것이다.
+
+---
+
+### 객체지향적으로 커피머신 만들기
+
+OOP를 이용해서 다시 한번 커피머신을 구현해보자. 객체지향이기 때문에 `object`를 이용하여 커피 머신을 만들어야 한다. 그리고 커피머신이라는 `class`를 구현해야 한다. 커피 머신에는 무엇이 필요할까? coffeeBeans라는 프로퍼티가 필요하고 커피를 만들 수 있는 makeCoffee가 필요하다. 커피 머신이라는 클래스를 만들고 이 클래스를 이용한 인스턴트 커피머신이라는 객체를 만들어 커피를 만들어보자.
