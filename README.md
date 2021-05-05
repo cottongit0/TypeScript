@@ -1015,7 +1015,7 @@ static을 붙이는 것과 붙이지 않은 것에는 차이가 있다. static�
 
 ---
 
-## 캡슐화
+## OOP - Encapsulation(캡슐화)
 
 만약 외부에서 coffeeBeans의 값을 음수로 설정하면 어떻게 될까? coffeeBeans가 음수가 되어서는 안된다. class 접근을 통해 coffeeBeans의 값을 외부에서 쉽게 수정할 수 있다. 사용자가 잘 이해하고 양수를 집어넣었다면 괜찮겠지만, 모르고 음수를 집어넣었다면 makeCoffee함수는 Error를 발생시킬 것이다. 사용자가 잘못된 값을 넣지 않도록 `캡슐화`가 필요하다.
 
@@ -1139,4 +1139,159 @@ setter와 getter는 일반 멤버변수처럼 사용가능하지만 어떠한 �
       }
       this.internalAge = num;
     }
+```
+
+---
+
+## OOP - Abstraction(추상화)
+
+외부에서 class를 바라봤을 때 인터페이스가 복잡하다. 사용할 수 있는 함수가 많아질수록 사용자는 어떤 함수를 이용해야할지 혼란스러워진다. 이럴 때는 `추상화`를 이용하여 필요한 `interface`만 노출하여 class를 더 쉽게 만들 수 있다.
+
+이제부터 보다 전문적인 커피머신을 만들어보자. 단순히 커피콩을 넣고 샷을 추출하던 커피머신에서 벗어나 다양한 기능을 추가할 것이다. 커피콩을 갈고(grindBeans) 커피머신을 예열하고(preHeat) 그리고 요청된 샷을 추출할 것이다(extract).
+
+먼저 grindBeans()부터 구현해보자. 우리는 이미 makeCoffee에서 grindBeans()를 구현했다. 받아온 shots만큼 뽑을 수 있는 커피콩이 있는지 확인하고 커피콩이 충분히 있다면 샷을 추출한다. 그리고 커피콩에서 사용힌 만큼의 커피콩을 빼준다.
+
+```ts
+    grindBeans(shots: number) {
+      if (this.coffeeBeans < shots * CoffeeMaker.BEANS_GRAM_PER_SHOT) {
+        throw new Error('커피콩이 부족합니다.');
+      }
+      console.log(`${shots}개의 커피를 갈고 있습니다.`);
+      this.coffeeBeans -= shots * CoffeeMaker.BEANS_GRAM_PER_SHOT;
+    }
+```
+
+이번엔 preHeat() 커피머신을 예열시키는 함수를 구현해보자. 이 함수는 console log에 예열되고 있다는 문장만 출력할 것이다.
+
+```ts
+    preHeat():void {
+      console.log("커피머신을 예열 중입니다. 기다려주세요.");
+    }
+```
+
+마지막으로 커피를 추출하는 extract() 함수를 만들어보자. 얼마만큼의 커피를 추출할 것인지 출력하고 CoffeeCup을 반환한다.
+
+```ts
+    extract(shots: number): CoffeeCup {
+      console.log(`${shots}개의 샷을 추출하고 있습니다.`);
+      return {
+        shots,
+        hasMilk: false,
+      };
+    }
+```
+
+이제 우리가 기존에 만들었던 makeCoffee에는 이 3가지 함수가 들어오게 된다.
+
+```ts
+    makeCoffee(shots: number): CoffeeCup {
+      this.grindBeans(shots);
+      this.preHeat();
+      return this.extract(shots);
+    }
+```
+
+이제 함수를 호출해보자. 굉장히 많은 함수들이 눈에 띌 것이다. 우리는 직접 구현해서 어떤 함수를 이용해야 할지 알 수 있다. 하지만 다른 사용자의 입장에서는 어떤 함수를 이용해야 맞는지 어려울 것이다. class에 있는 함수를 읽는다면 이해할 수 있겠지만 복잡한 코드의 경우 너무 오랜 시간이 걸린다. 이 문제를 해결하기 위해 `추상화`를 사용한다.
+
+<img src="./images/abstraction1.png">
+
+`추상화`는 interface를 굉장히 간단하게 만듦으로써 사용하는 사람이 쉽게 이용할 수 있도록 도와준다. 추상화의 방법에는 여러가지 방법이 있다. `캡슐화`를 통해서도 추상화를 할 수 있으며, `interface`를 이용해서도 가능하다. 혹은 interfacr가 없는 경우에는 정보 은닉을 통해서 추상화를 할 수 있다.
+
+먼저 정보 은닉 방법부터 알아보자. 앞서 사용했던 `private`를 이용하면 쉽게 구현할 수 있다. 내부에서 사용하는 동작이므로 외부에서 호출할 필요가 없는 함수에 private를 설정해주는 것이다. 이제 다시 외부에서 호출하려고 하면 fillCoffeeBeans와 makeCoffee 함수만 호출할 수 있다. 이렇게 정말 필요한 함수만 노출해서 양식을 좀 더 간단하게 만드는 것을 추상화라고 한다.
+
+```ts
+class CoffeeMaker {
+  private grindBeans(shots: number) {}
+  private preHeat(): void {}
+  private extract(shots: number): CoffeeCup {}
+}
+```
+
+이번에는 `interface`를 이용하여 추상화해보자. interface는 하나의 계약서이다. 어떤 규약을 갖고 있는지 어떤 행동을 할 수 있는지 명시해둔 것이다.
+
+> interface와 class의 이름을 만들 때, interface라면 'I'를 붙이거나, 구현한 class에 imple를 붙이기도 한다. 혹은 class의 이름을 좀 더 명시적으로 바꾸기도 한다. interface는 외부적으로 사용하는 이름이기 때문에 최대한 간단하게 사용하는 것이 좋다.
+
+```ts
+interface CoffeeMaker {
+  makeCoffee(shots: number): CoffeeCup;
+}
+class CoffeeMachine implements CoffeeMaker {}
+```
+
+이제 class는 interface의 규격을 따라간다. CoffeeMachine은 interface를 구현한다. 그래서 interface를 구현하는 class에서는 interface에서 규격된 모든 함수를 구현해야 한다. 우리는 이미 makeCoffee()를 구현해두었다. makeCoffee()를 지운다면 에러가 발생할 것이다. `interface에 있는 모든 함수가 class 안에 구현되어 있어야 한다.`
+
+이제 interface를 사용해보자. coffee의 타입은 우리가 이미 구현한 CoffeeMachine이 될 수 있다. 새롭게 coffee2를 만들어보자. coffee2의 타입은 CoffeeMaker 즉, interface를 받아온다. 하지만 아까와 차이점이 있다. 우리가 구현한 CoffeeMaker에는 오직 makeCoffee()라는 함수만 들어가 있다. 그래서 interface에 없는 fillCofeeBeans를 호출하게 되면 에러를 발생시킨다.
+
+```ts
+const coffee: CoffeeMachine = CoffeeMachine.makeMachine(32);
+coffee.fillCoffeeBeans(32);
+coffee.makeCoffee(2);
+
+const coffee2: CoffeeMaker = CoffeeMachine.makeMachine(32);
+coffee2.fillCoffeeBeans(32); // ERROR!
+coffee2.makeCoffee(2);
+```
+
+interface에는 없는 함수를 이용할 수 없다. 따라서 interface를 사용하면 내가 얼마만큼의 행동을 약속하고 보장할 것인지 결정할 수 있다.
+
+우리가 만든 CoffeeMaker는 오직 커피만 만들 수 있다. 커피를 제작하는 것 외에는 다른 기능이 없다. 좀 더 다양한 기능을 추가해보자. 커피머신에 보다 많은 기능을 추가할 것이다. CommercialCoffeeMaker라는 interface를 만든다. 여기에는 커피 전문샵에서 사용하는 커피머신이다. 조금 더 다양한 기능의 API를 추가할 것이다. CommercialCoffeeMaker에는 커피콩을 채울 수 있고(fillCoffeeBeans) 청소도 할 수 있다(clean). 이제 class와 연결해보자.
+
+```ts
+interface CommercialCoffeeMaker {
+  makeCoffee(shots: number): CoffeeCup;
+  fillCoffeeBeans(beans: number): void;
+  clean(): void;
+}
+```
+
+이제 class인 CoffeeMaker는 두 가지 interface의 규약을 따라간다. CoffeeMaker에 우리가 새로 구현할 clean이라는 함수를 추가해주자. 기계를 꺠끗이 청소하는 함수로 console log에 청소 중임을 알리도록 한다.
+
+```ts
+class CoffeeMachine implements CoffeeMaker, CommercialCoffeeMaker {
+  //...
+  clean() {
+    console.log("커피 머신을 청소 중입니다...");
+  }
+  //...
+}
+```
+
+이제 우리가 만든 interface인 CommercialCoffeeMaker를 사용해보자. 우리는 CommercialCoffeeMaker를 통해 커피콩을 채우고 커피를 만들고 청소까지 할 수 있다.
+
+```ts
+const coffee3: CommercialCoffeeMaker = CoffeeMachine.makeMachine(32);
+coffee3.fillCoffeeBeans(32);
+coffee3.makeCoffee(2);
+coffee3.clean();
+```
+
+이제 새로운 class로 만들어보자. 아마추어 사용자와 프로 바리스타로 나눌 것이다. AmateurUser는 간단한 커피 기계 밖에 이용하지 못하지만, ProBarista는 상업용 커피머신을 이용할 수 있다.
+
+```ts
+class AmateurUser {
+  constructor(private machine: CoffeeMaker) {}
+  makeCoffee() {
+    const coffee = this.machine.makeCoffee(2);
+    console.log(coffee);
+  }
+}
+class ProBarista {
+  constructor(private machine: CommercialCoffeeMaker) {}
+  makeCoffee() {
+    const coffee = this.machine.makeCoffee(3);
+    console.log(coffee);
+    this.machine.fillCoffeeBeans(32);
+    this.machine.clean();
+  }
+}
+```
+
+이제 AmateurUser class를 사용해보자. 아마추어는 커피만들기 밖에 하지 못한다. 우리가 makeCoffee에 구현했던 사항만 수행한다. 요청된 수만큼의 커피를 갈고 커피머신을 예열하고 샷을 추출한다.
+
+```ts
+amateur.makeCoffee();
+```
+
+```ts
+pro.makeCoffee();
 ```
