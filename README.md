@@ -801,7 +801,7 @@ poly는 many, morphy라는 다양한 형태를 말한다. 앞의 예시로 돌�
 
 ---
 
-## OOP - 커피머신 만들기
+# OOP - 커피머신 만들기
 
 ### 절차지향적으로 커피머신 만들기
 
@@ -882,7 +882,7 @@ console.log(coffee);
 
 ---
 
-### 객체지향적으로 커피머신 만들기
+## 객체지향적으로 커피머신 만들기
 
 OOP를 이용해서 다시 한번 커피머신을 구현해보자. 객체지향이기 때문에 `object`를 이용하여 커피 머신을 만들어야 한다. 그리고 커피머신이라는 `class`를 구현해야 한다. 커피 머신에는 무엇이 필요할까? coffeeBeans라는 프로퍼티가 필요하고 커피를 만들 수 있는 makeCoffee가 필요하다. 커피 머신이라는 클래스를 만들고 이 클래스를 이용한 인스턴트 커피머신이라는 객체를 만들어 커피를 만들어보자.
 
@@ -970,8 +970,6 @@ const coffee = new CoffeeMaker(20);
 
 만약 `static`을 붙이지 않는다면 인스턴스 혹은 object라고 불리는 인스턴스 레벨이 된다. class 레벨이라고 하는 것은 class와 연결되어 있기 때문에 object마다 만들어지거나 생성되지 않는다. 이제 `static` 데이터를 사용할 때는 this 키워드가 아닌 `class 이름`을 지정해주어야 한다. 즉, class에 있는 BEANS_GRAM_PER_SHOT 이라는 데이터에 접근하게 되는 것이다. object마다 새로 만들어야 하는 데이터라면 `멤버변수`로, class 레벨에서 함께 공유될 수 있는 것이라면 `static`으로 선언해야 한다.
 
-> static을 사용하는 예제는 다양하다. javascipt에서 'Math' 함수를 이용해 보았을 것이다. 이 Math도 class 레벨에 들어가 있다. 그래서 object를 생성하지 않아도 호출할 수 있다. class 레벨에 있는 함수들은 object를 생성하지 않아도 함수를 호출할 수 있다는 차이점이 있다.
-
 ```ts
 class CoffeeMaker {
   static BEANS_GRAM_PER_SHOT: number = 7;
@@ -993,4 +991,152 @@ class CoffeeMaker {
 }
 const coffee = new CoffeeMaker(20);
 console.log(coffee.makeCoffee(2));
+```
+
+`static`은 멤버변수 뿐만 아니라 `함수`에서도 적용할 수 있다. 만약 contructor를 호출하지 않고 새로운 커피머신을 만들고 싶다면 makeMachine이라는 새로운 함수를 이용하여 만들어보자. coffeeBeans의 초기값을 받아오하고 coffeeMaker를 만들어서 반환하는 함수이다. 이 함수 안에서 coffeeMaker를 만들어 전달할 수 있을 것이다.
+
+```ts
+class CoffeeMaker {
+  static makeMachine(coffeeBeans: number): CoffeeMaker {
+    return new CoffeeMaker(coffeeBeans);
+  }
+}
+```
+
+그러면 외부에서 class를 만들지 않아도 간단하게 makeMachine이라는 함수를 이용하여 커피머신을 만들 수 있다.
+
+```ts
+CoffeeMaker.makeMachine(3);
+```
+
+static을 붙이는 것과 붙이지 않은 것에는 차이가 있다. static을 없애면 더이상 class 레벨에 있는 함수를 이용할 수 없으며 만들어진 object 안에서 함수를 호출할 수 있다.
+
+> static을 사용하는 예제는 다양하다. javascipt에서 'Math' 함수를 이용해 보았을 것이다. 이 Math도 class 레벨에 들어가 있다. 그래서 object를 생성하지 않아도 호출할 수 있다. class 레벨에 있는 함수들은 object를 생성하지 않아도 함수를 호출할 수 있다는 차이점이 있다.
+
+---
+
+## 캡슐화
+
+만약 외부에서 coffeeBeans의 값을 음수로 설정하면 어떻게 될까? coffeeBeans가 음수가 되어서는 안된다. class 접근을 통해 coffeeBeans의 값을 외부에서 쉽게 수정할 수 있다. 사용자가 잘 이해하고 양수를 집어넣었다면 괜찮겠지만, 모르고 음수를 집어넣었다면 makeCoffee함수는 Error를 발생시킬 것이다. 사용자가 잘못된 값을 넣지 않도록 `캡슐화`가 필요하다.
+
+```ts
+maker.coffeeBeans = -35;
+```
+
+캡슐화는 외부에서 보이면 안되는 혹은 설정해서는 안되는 것을 은닉하는 것이다. `public`, `private`, `protected`라는 것을 이용하여 다양한 레벨의 정보를 은닉할 수 있다. 따로 작성하지 않으면 디폴트 값으로 public이 설정되어 있다.
+
+class에 있는 BEANS_GRAM_PER_SHOT은 고정된 값으로 수정이 필요없다. 외부에서 조작할 필요없는 데이터이다. 그렇다면 `private`를 이용하여 가릴 수 있다. 그리고 coffeeBeans의 조작도 위험하다. 외부에서 잘못 조작하면 Error를 발생시킬 수 있다. coffeeBeans도 `private`를 이용하여 외부에서 조작하지 못하도록 막아야 한다.
+
+```ts
+class CoffeeMaker {
+  private static BEANS_GRAM_PER_SHOT: number = 7;
+  private coffeeBeans: number;
+}
+```
+
+beans를 인자로 받아 coffeeBeans를 추가시키는 함수를 만들어보자. 외부에서 직접적으로 설정하는 것이 아닌 함수를 통해 coffeeBeans를 채운다. 함수를 통해 제어하는 덕분에 채우고자 하는 양이 유효한지 확인할 수 있다. 만약 사용자가 실수로 0 이하의 값을 입력하였다면 Error를 반환하도록 만든다. 유효한 값이 들어왔다면 coffeeBeans에 추가한다.
+
+```ts
+    fillCoffeeBeans(beans: number) {
+      if (beans < 0) {
+        return new Error("음수는 유효하지 않은 값입니다.");
+      }
+      this.coffeeBeans += beans;
+    }
+```
+
+내부의 상태는 `private`라는 비공개 키워드를 이용하여 숨기고, 외부에서는 `public`이라는 fillCoffeeBeans 함수를 이용해서 내부의 상태를 변경할 수 있도록 만들었다. 이러한 함수를 이용하는 덕분에 전달받은 인자가 유효한지 검사할 수 있다. 즉, 조금더 `안정성`을 높여 코딩할 수 있다.
+
+```ts
+maker.coffeeBeans = 32; //ERROR!
+maker.fillCoffeeBeans(32);
+```
+
+`static`이라는 키워드를 붙여서 object를 만들 수 있는 함수를 제공한다면, 보통 `constructor(생성자)`를 이용해서 생성하는 것을 금지하기 위해 사용한다. 이런 경우 `constructor`를 `private`로 만들어서 `static 메소드`를 이용할 수 있도록 권장하는 것이 좋다.
+
+```ts
+class CoffeeMaker {
+  private constructor(coffeeBeans: number) {
+    this.coffeeBeans = coffeeBeans;
+  }
+  static makeMachine(coffeeBeans: number): CoffeeMaker {
+    return new CoffeeMaker(coffeeBeans);
+  }
+}
+const coffee = CoffeeMaker.makeMachine(32);
+```
+
+> `protect`는 상속할 때 외부에서는 접근할 수 없지만 이 class를 상속한 자식 class에서만 접근 가능할 수 있도록 설정할 수 있다. 예를 들어 어떤 누구라도 class 외부에서는 coffeeBeans에 접근할 수 없지만 `protected`라고 설정하게 되면 CoffeeMaker를 상속한 다른 class 내에서는 접근이 가능해진다.
+
+---
+
+### getter와 setter
+
+다른 객체지향 개념으로 넘어가기 전, class의 `getter`와 `setter`에 대해 정리해보자. User라는 class는 firstName과 lastName을 갖고 있다. 이 데이터는 constructor를 통해서 firstName과 lastName을 받아올 수 있다. constructor 안에서 멤버변수 데이터를 초기화 시켜아 한다. 그리고 firstName과 lastName을 동시에 갖는 fullName이라는 변수도 선언한다.
+
+```ts
+class User {
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  constructor(firstName: string, lastName: string) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.fullName = `${firstName} ${lastName}`;
+  }
+}
+```
+
+이제 constructor를 호출해보자. 정상적으로 출력되는 것을 확인할 수 있다.
+
+```ts
+const user = new User("cotton", "git0");
+console.log(user.fullName);
+```
+
+이번에는 firstName의 값을 바꿔보자. 하지만 출력 시, contton git0이 출력된다.
+
+```ts
+user.firstName = "James";
+console.log(user.fullName);
+```
+
+fullName이 설정된 뒤에는 firstName과 lastName을 변경하여도 다시 fullName이 계산되지 않는다. 한 번 할당되면 계속 지정된 값을 갖는다. 이런 경우 `getter`를 이용하여 해결할 수 있다. 멤버변수를 바로 선언하고 설정하는 것이 아니라 `get`을 이용하여 fullName을 정의할 수 있다. `get`을 사용하면 함수 형태가 되지만, 접근할 때는 멤버변수에 접근하는 것처럼 작성해야 한다. 이제 fullName을 호출하면 변경된 값이 제대로 출력된다.
+
+```ts
+class User {
+  get fullName(): string {
+    return `${this.firstName} ${this.lastName}`;
+  }
+}
+const user = new User("cotton", "git0");
+console.log(user.fullName);
+user.firstName = "James";
+console.log(user.fullName);
+```
+
+이번엔 age 값을 받아보자. number타입의 internalAge라는 데이터를 만든다. get age()는 internalAge를 리턴한다. 그리고 set age()를 이용하여 숫자 num을 받아온다. set을 이용하면 this.internalAge를 전달받은 숫자로 설정할 수 있다. User의 internalAge로는 접근할 수 없지만, get과 set을 이용하면 internalAge가 private여도 멤버변수를 전달할 수 있다.
+
+```ts
+class User {
+  private internalAge: number = 0;
+  get age(): number {
+    return this.internalAge;
+  }
+  set age(num: number) {
+    this.internalAge = num;
+  }
+}
+user.age = 6;
+```
+
+setter와 getter는 일반 멤버변수처럼 사용가능하지만 어떠한 계산을 할 때 유용하게 사용할 수 있다. 조금 더 다양한 연산을 할 수 있고, 이 숫자가 정확한지에 대해 유효성 검사를 할 수 있다.
+
+```ts
+    set age(num: number) {
+      if(num < 0){
+        throw new Error("음수는 설정할 수 없습니다.")
+      }
+      this.internalAge = num;
+    }
 ```

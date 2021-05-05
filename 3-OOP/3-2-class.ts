@@ -11,6 +11,9 @@
     constructor(coffeeBeans: number) {
       this.coffeeBeans = coffeeBeans;
     }
+    static makeMachine(coffeeBeans: number): CoffeeMaker {
+      return new CoffeeMaker(coffeeBeans);
+    }
     makeCoffee(shots: number): CoffeeCup {
       if (this.coffeeBeans < shots * CoffeeMaker.BEANS_GRAM_PER_SHOT) {
         throw new Error("커피콩이 부족합니다.");
@@ -25,4 +28,6 @@
 
   const coffee = new CoffeeMaker(20);
   console.log(coffee.makeCoffee(2));
+
+  CoffeeMaker.makeMachine(3);
 }
