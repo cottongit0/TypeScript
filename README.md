@@ -1292,6 +1292,195 @@ class ProBarista {
 amateur.makeCoffee();
 ```
 
+이제 ProBarista를 사용해보자. 상업용 커피머신에는 다양한 기능이 구현되어 있다. 커피를 갈고 예열하고 샷을 추출하고 커피머신을 청소한다. CommercialCoffeeMaker interface에 있는 모든 사항을 수행한 뒤 종료한다.
+
 ```ts
 pro.makeCoffee();
 ```
+
+동일한 object의 인스턴스여도 이 object는 두 가지 interface를 구현하기 때문에 AmateurUser와 ProBarista는 CoffeeMachine(class)를 받아오는 것이 아니라 CoffeeMaker와 CommercialCoffeeMaker라는 interface에서 생성자를 받아온다. 그래서 interface에서 규약된 class보다는 조금 더 좁은 범위에 interface에서 규약된 함수들만 접근이 가능하다. 아마추어와 바리스타는 interface가 어떻게 구현되어 있는지 신경쓸 필요없이 interface에 규약된 함수들만 이용해서 생성된 object와 의사소통할 수 있다. 그렇기 떄문에 사용자들은 class의 복잡한 기능을 알 필요가 없다.
+
+---
+
+## OOP - Inheritance(상속)
+
+상속을 이용하면 class를 상속하는 다른 종류의 class를 만들 수 있다. 커퍼머신 class를 상속하는 다른 종류의 커피머신을 만들 수 있게 되는 것이다. 상속을 이용해 다양한 커피기계를 만들어보자.
+
+우유거품을 만들어 카페라떼를 만들 수 있는 머신을 추가해보자. class에 CaffeeLatte를 만든다. BEANS_GRAM_PER_SHOT, constructor, makeCoffee 모든 것 과정이 똑같다. 하지만 우유를 스팀하는 과정만 추가하면 CaffeeLatteMachine을 만들 수 있다. 다른 class를 상속할 때는 `extend`를 이용해야 한다.
+
+```ts
+class CaffeeLatteMachine extends CoffeeMachine {}
+```
+
+상속을 위해 `extends`를 이용했더니 Error가 발생했을 것이다. 살펴보면 constructor가 private이기 때문에 상속이 안된다고 적혀있다. `public`을 이용하면 상속받은 class는 물론 외부에서도 활용할 수 있다. 외부에서 보이면 안되지만 다른 class가 상속받아야 하는 경우, `protected`를 사용할 수 있다. `protected`는 상속하는 자식 class에서는 접근할 수 있으며 외부에서는 접근이 불가능하다. 외부에서 접근할 것과 접근을 막을 것을 분류하여 public과 protected를 설정해주자. 이제 Error없이 정상적으로 상속을 이용할 수 있다.
+
+```ts
+class CoffeeMachine implements CoffeeMaker {
+  protected static BEANS_GRAM_PER_SHOT: number = 7;
+  private coffeeBeans: number;
+
+  constructor(coffeeBeans: number) {
+    this.coffeeBeans = coffeeBeans;
+  }
+}
+```
+
+상속이 되었는지 확인하기 위해 아무것도 구현하지 않은 상태로 카페라떼 머신을 만들어보자.
+
+```ts
+const latteMaker = new CaffeeLatteMachine(32);
+const coffee = latteMaker.makeCoffee(1);
+console.log(coffee);
+```
+
+똑같이 커피콩을 갈고 커피머신을 예열하며 샷을 추출한다. 커피머신과 동일하게 출력되는 것을 확인할 수 있다. 이것이 바로 상속이다. 우리는 카페라떼 머신에 우유를 스팀해서 첨가되길 바란다. 상속한 class에서 다른 동작을 하고 싶다면 자식 class에서 부모 class에 있는 함수를 덮어 씌울 수 있다. 이를 `overwriting` 이라고 한다.
+
+부모 class에 있는 makeCofee함수를 overwriting 해보자. 부모 class인 CoffeeMachine에서는 hasMilk의 return값이 false였다. CoffeeLatteMachine은 우유를 사용할 것이니 true값을 리턴하면 된다. 다시 출력해보면 hasMilk가 true로 출력되는 것을 확인할 수 있다.
+
+```ts
+class CaffeeLatteMachine extends CoffeeMachine {
+  makeCoffee(shots: number): CoffeeCup {
+    return {
+      shots,
+      hasMilk: true,
+    };
+  }
+}
+```
+
+자식 class에서 부모에 있는 함수를 이용하고 싶을 때가 있다. const 부모에서 만든 coffee를 이용해보자. 그럴 때는 `super`를 이용하면 상속하는 부모에 있는 함수를 호출할 수 있다. 부모 class에 있는 makeCoffee 함수를 호출하여 기본적인 작업들이 이루어진 후, 만들어진 커피에 우유를 추가할 것이다.
+
+CaffeeLateeMachine에서 쓸 steamMilk를 만들어보자. 내부에서만 작동하며 외부에서 사용할 수 없도록 `private`를 설정해준다. steamMilk는 console에 우유가 스팀 중임을 알리는 로그를 출력시킨다. 그리고 부모에서 만든 coffee를 그대로 이용하면서 hasMilk만 true값으로 바꿔주면 된다.
+
+```ts
+class CaffeeLatteMachine extends CoffeeMachine {
+  private steamMilk(): void {
+    console.log("우유를 스팀 중입니다...");
+  }
+  makeCoffee(shots: number): CoffeeCup {
+    const coffee = super.makeCoffee(shots);
+    this.steamMilk();
+
+    return {
+      ...coffee,
+      hasMilk: true,
+    };
+  }
+}
+```
+
+이제 출력해보면 기본적인 모든 과정을 거친 후, 우유를 스팀하고 hasMilk가 true가 된 것을 확인할 수 있다.
+
+상속을 잘 이용하면 `공통적인 기능은 그대로 재사용`하면서 자식 class에서 `특화된 기능을 추가`할 수 있다. 그리고 `super`라는 키워드를 이용하여 부모 class에 있는 함수를 호출하거나 접근할 수 있다.
+
+만약 자식 class에서 또다른 데이터 contructor를 받아올 수 있다면 어떻게 될까. 이번에는 기계의 serialNumber를 받아와보자. 자식 class에서 constructor를 구현하는 경우에는 Error가 발생하며 경고문을 띄운다.
+
+> 파생 클래스의 생성자는 'super' 호출을 포함해야 합니다.
+
+constructor 내부에 super 함수를 작성하면 된다. 하지만 또 빨간 줄이 그이며 경고문이 나온다.
+
+> 1개의 인수가 필요한데 0개를 가져왔습니다.
+
+우리가 만든 CoffeeMachine의 contructor는 coffeeBeans라는 인수를 갖고 있다. 추가적으로 어떤 데이터를 받아올 때는 공통적으로 부모 class에서 필요한 데이터를 받아와야 한다. 부모 class와 같이 constructor에 커피콩을 받아오자. 그리고 우리는 serialNumber도 받아올 것이다. 총 두 가지의 인수를 받는 constructor를 만들었다. 받아온 데이터는 super를 이용하여 전달해주면 앞선 문제가 해결된다.
+
+외부에서 보여줘도 되는 데이터지만, 외부에서 수정하면 안되는 데이터의 경우 public `readonly`를 사용할 수 있다.
+
+```ts
+class CaffeeLatteMachine {
+  constructor(beans: number, public readonly serialNumber: string) {
+    super(beans);
+  }
+}
+```
+
+이제 CaffeeLatteMachine을 호출해보자.
+
+```ts
+const latteMaker = new CaffeeLatteMachine(32, "SN-1010");
+const coffee = latteMaker.makeCoffee(1);
+console.log(coffee);
+console.log(latteMaker.serialNumber);
+```
+
+CaffeeLatteMachine에 커피콩과 시리얼 넘버 두개의 인자를 전달하고 출력해보면 정상적으로 작동하는 것을 확인할 수 있다.
+
+---
+
+## OOP - Polymorphism(다형성)
+
+class를 상속하고 자신을 class에 맞게 부모의 함수를 다시 구현함으로써 `다형성`을 만들어볼 수 있다. 이번에는 설탕을 넣는 커피머신(SweetCoffeeMaker)를 만들어보면서 `다형성`에 대해 이해해보자.
+
+우선 동일하고 부모 class에 있는 함수를 overwriting을 할 것이다. 동일한 interface를 유지하며 똑같이 CoffeeCup을 리턴한다. 부모 class에 있는 super.makerCoffee를 이용하여 커피를 만들어보자. 반환할 때는 만들어진 커피를 하나씩 풀어서 sugar를 추가하면 된다. 이때 hasSugar를 true로 설정해주면 된다.
+
+```ts
+class SweetCoffeeMaker extends CoffeeMachine {
+  constructor(beans: number) {
+    super(beans);
+  }
+  private addSugar() {
+    console.log("설탕을 추가합니다.");
+  }
+  makeCoffee(shots: number): CoffeeCup {
+    const coffee = super.makeCoffee(shots);
+    this.addSugar();
+    return {
+      ...coffee,
+      hasSugar: true,
+    };
+  }
+}
+```
+
+하지만 아직 CoffeeCup에는 hasSugar가 설정되어 있지 않다. hasSugar를 true로 설정해주면 된다. hasSugar는 `Optional parameter`를 이용해보자. 설탕은 설정할 수도 있고 안할 수도 있다.
+
+```ts
+type CoffeeCup = {
+  shots: number;
+  hasMilk: boolean;
+  hasSugar?: boolean;
+};
+```
+
+각각 다른 3가지의 커피머신을 구현해보았다. CoffeeMachine은 부모 class이고 CaffeLatteMachine과 SweetCoffeeMaker는 CoffeeMachine을 상속한 자식 class이다. 이처럼 `다형성`을 이용하면 한 가지의 class나 한 가지의 interface를 통해서 다른 방식으로 구현한 class를 만들 수 있다.
+
+이제 다형성의 장점을 확인해보자. machines라는 배열을 만들어보자. 이 배열에는 다양한 커피머신이 들어가 있다. 심플한 커피머신, 카페라떼를 만들 수 있는 커피머신, 그리고 설탕을 넣을 수 있는 커피머신이 있다.
+
+```ts
+const machines = [
+  new CoffeeMachine(16),
+  new CaffeeLatteMachine(16, "SN-1010"),
+  new SweetCoffeeMaker(16),
+  new CoffeeMachine(16),
+  new CaffeeLatteMachine(16, "SN-1010"),
+  new SweetCoffeeMaker(16),
+];
+```
+
+machines를 돌면서 각각의 머신을 받아와 console에 출력해볼 것이다. forEach문을 사용하여 makeCoffee를 출력해보자. 배열에 있는 모든 커피머신들이 쭉 돌면서 수행되고 있다는 것을 확인할 수 있다.
+
+```ts
+machines.forEach((machine) => {
+  console.log("---------------------------------------");
+  machine.makeCoffee(1);
+});
+```
+
+`다형성`의 장점은 내부적으로 구현된 다양한 class들이 한 가지의 interface를 구현하거나 동일한 부모 class를 상속했은 때 동일한 함수를 class별로 구분하지 않고 공통된 API(makeCoffee)를 통해 호출할 수 있다는 점이다.
+
+하지만 API를 사용했을 때 makeCoffee뿐만 아니라 CoffeeMachine에서 public으로 설정한 모든 함수를 사용할 수 있다. 이 범위를 좀 더 좁혀보자. 외부에서는 오직 makeCoffee만 접근할 수 있도록 만들 것이다.
+
+CaffeLatteMachine과 SweetCoffeeMaker는 CoffeMachine의 자식이다. CoffeeMachin은 곧 CoffeeMaker다. 즉 machines는 CoffeeMaker의 배열로 만들 수 있다. CoffeeMaker에는 오직 makeCoffee라는 함수만 존재한다. 이제 machines를 호출하면 makeCoffee밖에 사용하지 못함을 확인할 수 있다.
+
+```ts
+const machines: CoffeeMaker[] = [
+  //...
+];
+```
+
+이처럼 다형성은 하나의 인터페이스나 부모의 class를 상속한 자식 class들이 interface와 부모 class에 있는 함수를 `다른 방식으로 다양하게 구성`함으로써 다양하게 만들 수 있음을 의미한다. 이처럼 interface와 부모 class에 있는 동일한 함수 API를 통해서 각각의 구현된 자식 class의 내부 구현사항을 신경쓰지 않고 약속된 한 가지의 API를 호출함으로써 사용하는 사람도 간편하게 다양한 기능을 활용할 수 있도록 도울 수 있다.
+
+---
+
+## OOP - composition
+
+`Composition`에 대해 알기 전, `상속에 대한 문제점`을 알 필요가 있다. 흔히들 족보가 꼬인다는 말을 들어봤을 것이다. 상속의 깊이가 점점 깊어질 수록 서로 간의 관계가 복잡해진다. 우리의 만든 커피머신만 봐도 알 수 있다. CoffeMachine이 있고 CaffeLatteMachine과 SweetCoffeeMaker를 상속한다. 만약 우리가 우유거품도 들어갔고 설탕도 들어간 달달한 카페라떼를 만들고 싶다면 어떻게 해야할까? CaffeLatteMachine와 SweetCoffeeMaker를 상속한 새로운 class를 만들 것이다. 이것들이 여러 개 생기게 되면 엄청나게 복잡해질 것이다. 상속의 관계는 `수직적`이기 때문에 부모 class의 행동을 수정하게 되면 수정사항 때문에 모든 자식 class에 영향을 미친다. 새로운 기능을 도입하려 해도 어떻게 상속의 구조를 가져와야 할지 복잡해진다. 제일 큰 문제점은 `타입스크립트에서는 한 가지 이상의 부모 class를 상속할 수 없다!` 즉, 우리가 SweetCaffeLatteMachine을 만들고 싶어도 CaffeLatteMachine와 SweetCoffeeMaker를 상속하는 class를 만들 수 없다. 이러한 상속의 문제점 때문에 `composition`을 사용해야 한다.
