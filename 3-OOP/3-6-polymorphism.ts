@@ -78,9 +78,6 @@
   }
 
   class SweetCoffeeMaker extends CoffeeMachine {
-    constructor(beans: number) {
-      super(beans);
-    }
     private addSugar() {
       console.log("설탕을 추가합니다.");
     }
@@ -98,7 +95,7 @@
   const sugar = sweetMaker.makeCoffee(1);
   console.log(sugar);
 
-  const machines = [
+  const machines: CoffeeMaker[] = [
     new CoffeeMachine(16),
     new CaffeeLatteMachine(16, "SN-1010"),
     new SweetCoffeeMaker(16),

@@ -1414,9 +1414,6 @@ class를 상속하고 자신을 class에 맞게 부모의 함수를 다시 구�
 
 ```ts
 class SweetCoffeeMaker extends CoffeeMachine {
-  constructor(beans: number) {
-    super(beans);
-  }
   private addSugar() {
     console.log("설탕을 추가합니다.");
   }
@@ -1484,3 +1481,9 @@ const machines: CoffeeMaker[] = [
 ## OOP - composition
 
 `Composition`에 대해 알기 전, `상속에 대한 문제점`을 알 필요가 있다. 흔히들 족보가 꼬인다는 말을 들어봤을 것이다. 상속의 깊이가 점점 깊어질 수록 서로 간의 관계가 복잡해진다. 우리의 만든 커피머신만 봐도 알 수 있다. CoffeMachine이 있고 CaffeLatteMachine과 SweetCoffeeMaker를 상속한다. 만약 우리가 우유거품도 들어갔고 설탕도 들어간 달달한 카페라떼를 만들고 싶다면 어떻게 해야할까? CaffeLatteMachine와 SweetCoffeeMaker를 상속한 새로운 class를 만들 것이다. 이것들이 여러 개 생기게 되면 엄청나게 복잡해질 것이다. 상속의 관계는 `수직적`이기 때문에 부모 class의 행동을 수정하게 되면 수정사항 때문에 모든 자식 class에 영향을 미친다. 새로운 기능을 도입하려 해도 어떻게 상속의 구조를 가져와야 할지 복잡해진다. 제일 큰 문제점은 `타입스크립트에서는 한 가지 이상의 부모 class를 상속할 수 없다!` 즉, 우리가 SweetCaffeLatteMachine을 만들고 싶어도 CaffeLatteMachine와 SweetCoffeeMaker를 상속하는 class를 만들 수 없다. 이러한 상속의 문제점 때문에 `composition`을 사용해야 한다.
+
+> Favor Composition over inheritance!
+
+우리는 상속대신 `composition`을 선호해야 한다. Composition은 `구성`이라는 뜻으로 우리가 레고를 만들 때, 필요한 부품들을 모아 조립해 나가는 것처럼 composition도 `필요한 것들을 가져다 조립`하는 것을 의미한다. 이제 이 composition이 무엇인지 예제를 통해 확인해보자.
+
+> 하지만 상속을 사용하는 것이 나쁜건 아니다. 상속을 이용해서 공통적으로 쓰이는 CoffeeMachine이라는 로직을 다른 여러 자식요소들이 상속함으로써 공통적인 행동들을 재사용이 가능했다. 즉, 상속은 재사용성을 높여준다. 중요한 것은 관계를 상속으로만 만들면 관계가 복잡해질 수 있다. 따라서 불필요한 상속 대신에 composition을 이용하는 것이다.
