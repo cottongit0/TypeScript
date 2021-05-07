@@ -60,51 +60,75 @@
   }
 
   class CaffeeLatteMachine extends CoffeeMachine {
-    constructor(beans: number, public readonly serialNumber: string) {
+    constructor(
+      beans: number,
+      public readonly serialNumber: string,
+      private milkFother: CheapMilkSteamer
+    ) {
       super(beans);
-    }
-    private steamMilk(): void {
-      console.log("우유를 스팀 중입니다...");
     }
     makeCoffee(shots: number): CoffeeCup {
       const coffee = super.makeCoffee(shots);
-      this.steamMilk();
-
-      return {
-        ...coffee,
-        hasMilk: true,
-      };
+      return this.milkFother.makeMilk(coffee);
     }
   }
 
   class SweetCoffeeMaker extends CoffeeMachine {
-    private addSugar() {
-      console.log("설탕을 추가합니다.");
+    constructor(beans: number, private sugar: AutomaticSugarMixer) {
+      super(beans);
     }
     makeCoffee(shots: number): CoffeeCup {
       const coffee = super.makeCoffee(shots);
-      this.addSugar();
+      return this.sugar.addSugar(coffee);
+    }
+  }
+
+  class CheapMilkSteamer {
+    private steamMilk(): void {
+      console.log("우유 거품을 내는 중입니다..");
+    }
+    makeMilk(cup: CoffeeCup): CoffeeCup {
+      this.steamMilk;
       return {
-        ...coffee,
-        hasSugar: true,
+        ...cup,
+        hasMilk: true,
+      };
+    }
+  }
+  class AutomaticSugarMixer {
+    private getSugar(): boolean {
+      console.log("설탕을 가져옵니다.");
+      return true;
+    }
+    addSugar(cup: CoffeeCup): CoffeeCup {
+      const sugar = this.getSugar();
+      return {
+        ...cup,
+        hasSugar: sugar,
       };
     }
   }
 
-  const sweetMaker = new SweetCoffeeMaker(32);
-  const sugar = sweetMaker.makeCoffee(1);
-  console.log(sugar);
-
-  const machines: CoffeeMaker[] = [
-    new CoffeeMachine(16),
-    new CaffeeLatteMachine(16, "SN-1010"),
-    new SweetCoffeeMaker(16),
-    new CoffeeMachine(16),
-    new CaffeeLatteMachine(16, "SN-1010"),
-    new SweetCoffeeMaker(16),
-  ];
-  machines.forEach((machine) => {
-    console.log("---------------------------------------");
-    machine.makeCoffee(1);
-  });
+  class SweetCaffeLatteMachine extends CoffeeMachine {
+    constructor(
+      private beans: number,
+      private milk: CheapMilkSteamer,
+      private sugar: AutomaticSugarMixer
+    ) {
+      super(beans);
+    }
+    makeCoffee(shots: number): CoffeeCup {
+      const coffee = super.makeCoffee(shots);
+      return this.milk.makeMilk(this.sugar.addSugar(coffee));
+    }
+  }
+  const cheeepMilkMaker = new CheapMilkSteamer();
+  const candySugar = new AutomaticSugarMixer();
+  const sweetMachine = new SweetCoffeeMaker(12, candySugar);
+  const latteMachine = new CaffeeLatteMachine(12, "SN-1010", cheeepMilkMaker);
+  const sweetLatteMachine = new SweetCaffeLatteMachine(
+    12,
+    cheeepMilkMaker,
+    candySugar
+  );
 }

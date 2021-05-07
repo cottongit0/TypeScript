@@ -1478,6 +1478,92 @@ const machines: CoffeeMaker[] = [
 
 ---
 
+## OOP - abstract
+
+우리가 어떤 상속 class를 이용할 때, 무언가 반복되는 class에서 절차적으로 진행되는 것이 있고 어떤 특정한 기능만 자식 class에서 행동이 달라진다면 `abstract` class를 만들 수 있다.
+
+CoffeeMaker라는 interface가 있고 CoffeeMachine에 최종 부모class가 있다. 그리고 그것을 상속하는 두 가지의 class가 있다. CoffeeMachine에는 많은 함수들 중에서 makeCoffee라는 함수에서 커피콩을 갈고 가열하고 추출하는 절차가 정해져 있다. extract에서는 설탕이나 우유를 추가할 수 있다.
+
+만약 자식 class에서 `super`를 호출하지 않는 실수를 할 수 있다. shots을 받아와 그냥 커피를 만들 수 있다. 절차적으로 수행되어야 할(커피를 갈고, 머신을 가열하고, 추출하는) 과정들을 놓칠 수 있다. 조금 더 안전하고 절차적으로 코드를 운용하고 싶다면 `abstract` class를 만들어 볼 수 있다.
+
+```ts
+class CaffeeLatteMachine extends CoffeeMachine {
+  //...
+  makeCoffee(shots: number): CoffeeCup {
+    this.steamMilk();
+
+    return {
+      shots,
+      hasMilk: true,
+    };
+  }
+}
+```
+
+부모 class은 CoffeeMachine 앞에 `abstract`를 붙여보자. 이제 CoffeeMachine 자체로는 오브젝트를 만들 수 없다. new CoffeeMachine이 에러를 발생시키고 있음을 확인할 수 있다.
+
+> 추상 클래스의 인스턴스를 만들 수 없습니다.
+
+그래서 이 abstract는 만들어지는 것을 목적으로 하지 않고 `부모/추상 클래스로서 필요한 것을 정의`해놓은 것이다.
+
+```ts
+abstract class CoffeeMachine implements CoffeeMaker {}
+```
+
+이제 abstract class 안에서 추상을 선언할 수 있다. CoffeeMachine안에 있는 함수 중 extract를 이용해보자. 자식 class마다 달라질 수 있는 행동이 있다면 함수 앞에 abstract를 붙일 수 있다. abstract를 붙인 함수는 자식 class마다 다르게 구현해야 할 것이다. 외부에서는 extract만 접근할 수 없기 때문에 접근 제어자인 `protected`를 사용한다.
+
+추상적인 메소드이기 때문에 구현사항은 작성해서는 안된다. 오직 abstract라고만 선언해야 한다.
+
+```ts
+abstract class CoffeeMachine implements CoffeeMaker {
+  protected abstract extract(shots: number): CoffeeCup;
+}
+```
+
+이제 다른 자식 class에서 extract를 구현해보자. 더이상 makeCoffee를 overwriting할 필요는 없다. 동일하게 protected를 사용하여 extract 메소드를 구현해보자. super를 호출하여 함수를 만들지 않아도 추상메소드만으로도 구현할 수 있다.
+
+```ts
+class CaffeeLatteMachine extends CoffeeMachine {
+  //...
+  protected extract(shots: number): CoffeeCup {
+    this.steamMilk();
+    return {
+      shots,
+      hasMilk: true,
+    };
+  }
+}
+
+class SweetCoffeeMaker extends CoffeeMachine {
+  //...
+  protected extract(shots: number): CoffeeCup {
+    this.getSugar();
+    return {
+      shots,
+      hasMilk: false,
+      hasSugar: true,
+    };
+  }
+}
+```
+
+이제 CoffeeMachine은 추상 클래스이기 때문에 항상 이것을 구현한 class만 만들 수 있다. 이제 코드를 실행하여 결과값을 확인해보자. 동일하게 작동하는 것을 확인할 수 있다.
+
+```ts
+const machines: CoffeeMaker[] = [
+  new CaffeeLatteMachine(16, "SN-1010"),
+  new SweetCoffeeMaker(16),
+  new CaffeeLatteMachine(16, "SN-1010"),
+  new SweetCoffeeMaker(16),
+];
+```
+
+abstract 클래스로 만들어진 클래스는 오브젝트를 사용할 수 없다. 오직 추상적인 클래스이다. 그래서 공통적인 기능들이 있다면 그런 기능들을 다 구현할 수 있다. 이걸 구현하는 클래스마다 달라져야 하는 내용이 있다면 그 부분만 abstract 메소드로 정의할 수 있다. 우리가 interface에서 함수의 규격을 정의한 것처럼 abstract 메소드에서는 함수 이름은 뭔지 어떤 인자를 받아서 어떤걸 리턴하는지만 정의할 수 있다. 구현하는 class마다 달라져야하는 이 abstract 함수만 abstract 클래스를 구현하는 곳에서 구현해주면 된다.
+
+이렇게 abstract 클래스를 이용하면 조금 더 안전하게 우리가 의도한대로 공통적인 기능들을 수행하고 달라져야 되는 것만 상속하는 class에게 꼭 구현해야할 사항을 강조할 수 있다. 상속을 이용할 때는 abstract의 사용을 한 번 고려해보는 것도 좋다.
+
+---
+
 ## OOP - composition
 
 `Composition`에 대해 알기 전, `상속에 대한 문제점`을 알 필요가 있다. 흔히들 족보가 꼬인다는 말을 들어봤을 것이다. 상속의 깊이가 점점 깊어질 수록 서로 간의 관계가 복잡해진다. 우리의 만든 커피머신만 봐도 알 수 있다. CoffeMachine이 있고 CaffeLatteMachine과 SweetCoffeeMaker를 상속한다. 만약 우리가 우유거품도 들어갔고 설탕도 들어간 달달한 카페라떼를 만들고 싶다면 어떻게 해야할까? CaffeLatteMachine와 SweetCoffeeMaker를 상속한 새로운 class를 만들 것이다. 이것들이 여러 개 생기게 되면 엄청나게 복잡해질 것이다. 상속의 관계는 `수직적`이기 때문에 부모 class의 행동을 수정하게 되면 수정사항 때문에 모든 자식 class에 영향을 미친다. 새로운 기능을 도입하려 해도 어떻게 상속의 구조를 가져와야 할지 복잡해진다. 제일 큰 문제점은 `타입스크립트에서는 한 가지 이상의 부모 class를 상속할 수 없다!` 즉, 우리가 SweetCaffeLatteMachine을 만들고 싶어도 CaffeLatteMachine와 SweetCoffeeMaker를 상속하는 class를 만들 수 없다. 이러한 상속의 문제점 때문에 `composition`을 사용해야 한다.
@@ -1487,3 +1573,315 @@ const machines: CoffeeMaker[] = [
 우리는 상속대신 `composition`을 선호해야 한다. Composition은 `구성`이라는 뜻으로 우리가 레고를 만들 때, 필요한 부품들을 모아 조립해 나가는 것처럼 composition도 `필요한 것들을 가져다 조립`하는 것을 의미한다. 이제 이 composition이 무엇인지 예제를 통해 확인해보자.
 
 > 하지만 상속을 사용하는 것이 나쁜건 아니다. 상속을 이용해서 공통적으로 쓰이는 CoffeeMachine이라는 로직을 다른 여러 자식요소들이 상속함으로써 공통적인 행동들을 재사용이 가능했다. 즉, 상속은 재사용성을 높여준다. 중요한 것은 관계를 상속으로만 만들면 관계가 복잡해질 수 있다. 따라서 불필요한 상속 대신에 composition을 이용하는 것이다.
+
+두 개의 class를 만들어보자. 하나는 저렴한 우유를 거품내는 class(CheapMilkSteamer)와 다른 하나는 설탕을 자동으로 섞어주는 class(AutomaticSugarMixer)를 만들 것이다. CheapMilkSteamer는 steamMilk 함수를 통해 console에 거품을 낸다는 것을 알리고 hasMilk를 true로 반환한다. AutomaticSugarMixer는 getSugar를 통해 설탕을 가져옴을 console에 알려준다. 그리고 true값을 반환한다. addSugar는 CoffeeCup을 인자로 받아오며 CoffeeCup을 반환한다. 그리고 hasSugar를 sugar값(true)로 덮어준다.
+
+```ts
+class CheapMilkSteamer extends CoffeeMachine {
+  private steamMilk(): void {
+    console.log("우유 거품을 내는 중입니다..");
+  }
+  makeMilk(cup: CoffeeCup): CoffeeCup {
+    this.steamMilk;
+    return {
+      ...cup,
+      hasMilk: true,
+    };
+  }
+}
+class AutomaticSugarMixer extends CoffeeMachine {
+  private getSugar(): boolean {
+    console.log("설탕을 가져옵니다.");
+    return true;
+  }
+  addSugar(cup: CoffeeCup): CoffeeCup {
+    const sugar = this.getSugar();
+    return {
+      ...cup,
+      hasSugar: sugar,
+    };
+  }
+}
+```
+
+우유 거품기와 설탕 제조기를 만들었다. 이제 우유와 설탕이 필요한 곳에서 각각 로직을 반복해서 작성할 필요 없이 `외부에서 주입`받아서 가져올 것이다. 이를 `Dependecy Injection`이라고 부른다. 이제 CaffeLatteMachine과 SweetCoffeeMaker에서 필요한 것을 외부에서 불러와보자.
+
+CaffeLatteMachine에 우유거품을 받아올 변수가 필요하다. milkFother은 CheapMilkSteamer밖에 없다. private로 지정한 후, class의 멤버변수로 만든다. 이제 우리는 CheapMilkSteamer에서 우유거품을 내는 과정을 받아올 수 있다. 이젠 steamMilk를 사용하여 hasMilk값을 바꿔줄 필요가 없다. return.this의 milkFrother가 있는 makeMilk 함수를 통해 우리가 만든 커피를 전달하면 우유거품을 추가해서 새로운 커피를 리턴한다.
+
+```ts
+class CaffeeLatteMachine extends CoffeeMachine {
+  constructor(
+    beans: number,
+    public readonly serialNumber: string,
+    private milkFother: CheapMilkSteamer
+  ) {
+    super(beans);
+  }
+  makeCoffee(shots: number): CoffeeCup {
+    const coffee = super.makeCoffee(shots);
+    return this.milkFother.makeMilk(coffee);
+  }
+}
+```
+
+SweetCoffeeMaker도 동일하다. AutomaticSugarMixer에서 설탕을 받아올 sugar를 설정해준다. 그리고 makeCoffee에서 this.sugar를 통해 addSugar를 불러온다.
+
+```ts
+class SweetCoffeeMaker extends CoffeeMachine {
+  constructor(beans: number, private sugar: AutomaticSugarMixer) {
+    super(beans);
+  }
+  makeCoffee(shots: number): CoffeeCup {
+    const coffee = super.makeCoffee(shots);
+    return this.sugar.addSugar(coffee);
+  }
+}
+```
+
+이렇게 각각의 class에서는 우리가 필요한 것을 매번 구현하는 것이 아니라, `Composition`을 통해각각의 기능별로 class를 따로 만들어 둠으로써 필요한 곳에서 가져다가 쓸 수 있다. 이제 손쉽게 SweetCaffeLatte를 만들 수 있다.
+
+constructor를 이용하여 super에서 필요한 beans 정보를 받아오자. 그리고 CheapMilkSteamer, AutomaticSugarMixer를 통해 우유거품과 설탕을 받아올 것이다. 상속된 이 class에서는 항상 super에 contructor를 호출해주어야 한다. 똑같이 super에 beans를 전달해주면 된다. 이제 makeCoffee라는 함수를 Overwriting 해보자.
+
+먼저 const coffee는 부모에 있는 makeCoffee를 이용해서 기본적인 커피를 만든다. 그리고 반환값으로 우유와 설탕을 전달해주면 된다. milk에 있는 makeMilk함수와 sugar에 있는 addSugar를 이용하여 반환해주면 된다.
+
+```ts
+class SweetCaffeLatteMachine extends CoffeeMachine {
+  constructor(
+    private beans: number,
+    private milk: CheapMilkSteamer,
+    private sugar: AutomaticSugarMixer
+  ) {
+    super(beans);
+  }
+  makeCoffee(shots: number): CoffeeCup {
+    const coffee = super.makeCoffee(shots);
+    return this.milk.makeMilk(this.sugar.addSugar(coffee));
+  }
+}
+```
+
+만약 위 과정이 복잡하다면 필요한 함수를 정의할 수 있다.
+
+```ts
+class SweetCaffeLatteMachine extends CoffeeMachine {
+  constructor(
+    private beans: number,
+    private milk: CheapMilkSteamer,
+    private sugar: AutomaticSugarMixer
+  ) {
+    super(beans);
+  }
+  makeCoffee(shots: number): CoffeeCup {
+    const coffee = super.makeCoffee(shots);
+    const sugarAdded = this.sugar.addSugar(coffee);
+    return this.milk.makeMilk(sugarAdded);
+  }
+}
+```
+
+Composition을 이용하면 필요한 기능을 가져와서 외부에서 주입받아 필요한 기능을 `재사용`할 수 있다. 하지만 Composition에도 치명적인 단점이 있다.
+
+CaffeLatteMachine과 SweetCoffeeMaker, SweetCaffeLatteMachine 이 3가지는 CheapMilkSteamer와 AutomaticSugarMixer랑 굉장히 타이트하기 이어져 있다. 즉, 앞의 3가지 class는 항상 CheapMilkSteamer와 AutomaticSugarMixer를 이용해야 한다. 나중에 다른 우유거품기와 설탕제조기를 만들었을 때, 이 모든 class가 새로 업데이트되어야 한다. 즉, 항상 CheapMilkSteamer와 AutomaticSugarMixer만 사용할 수 있는 class로 스스로를 제약시킨다. 그래서 `class는 너무 깊게 연관되서는 안된다.`
+
+---
+
+## OOP - 강력한 interface
+
+상속보다 Composition을 더 선호해야 한다. Composition을 통해 복잡한 상속의 수직구조를 피하면서 상속의 레벨을 한 단계로만 유지하면서 코드를 어떻게 재사용할 수 있는지 알아보았다. 하지만 우리가 가져다 쓰는 class가 서로 너무 밀접해지는 문제가 발생했다. 밀접한 관계는 변경이 일어나거나 다른 것으로 대체하고 싶다면 연관된 모든 Class를 업데이트해야 한다. 이번에는 조금 더 확장이 가능하고 유연하게 사용할 수 있는 방법을 알아보자.
+
+Composition을 통해 그럴싸하게 만들었지만 아직 문제가 많다. 각 Class를 한 번 사용해보자.
+
+```ts
+const cheeepMilkMaker = new CheapMilkSteamer();
+const candySugar = new AutomaticSugarMixer();
+const sweetMachine = new SweetCoffeeMaker(12, candySugar);
+const latteMachine = new CaffeeLatteMachine(12, "SN-1010", cheeepMilkMaker);
+const sweetLatteMachine = new SweetCaffeLatteMachine(
+  12,
+  cheeepMilkMaker,
+  candySugar
+);
+```
+
+한 눈에 봐도 재사용성이 떨어져 보인다. A브랜드의 우유와 B브랜드의 설탕만 넣을 수 있는 커피머신이 있다. 커피머신에 좀 더 좋은 설탕을 넣거나 고급스러운 우유 거품기를 구입해도 커피머신에 사용할 수 없게 된다. 정말 사용하고 싶다면 커피 기계를 분리해서 다시 만들어야 한다. 만약 이런 커피머신이 있다면 아무도 구입하지 않을 것이다. 그래서 Class들 사이에 서로 상호작용을 하는 경우에는 Class 자신을 노출하는 것이 아니라 계약서를 통해 의사소통해야 한다. 앞서 우리는 `interface`라는 강력한 계약서를 배웠다. interface를 통해 class 간의 의사소통을 조절할 수 있다. 이것이 `디커플링 원칙`이다
+
+이제 우유에 거품을 내고 설탕을 만들 수 있는 각각의 interface를 만들어보자. makeMilk와 addSugar를 재사용한 각각의 interface를 선언한다. 각각 정해진 interface는 계약서 규격 상황에 맞는 함수를 구현한 규격을 따라가는 class다.
+
+```ts
+interface MilkFrother {
+  makeMilk(cup: CoffeeCup): CoffeeCup;
+}
+
+interface SugarProvider {
+  addSugar(cup: CoffeeCup): CoffeeCup;
+}
+```
+
+이제 사용하는 곳에서 class를 받아오는 것이 아니라, interface에서 받아오자. class 간에 커플링되어 있던 것들이 interface를 통해 디커플링되었다. 이제 서로 연결되어 있지않고 interface를 통해 의사소통을 하게 되었다. 이제부터 코드의 재사용성을 극대화할 수 있다.
+
+```ts
+class CaffeeLatteMachine extends CoffeeMachine {
+  constructor(
+    beans: number,
+    public readonly serialNumber: string,
+    private milkFother: MilkFrother
+  ) {
+    super(beans);
+  } //...
+}
+
+class SweetCoffeeMaker extends CoffeeMachine {
+  constructor(beans: number, private sugar: SugarProvider) {
+    super(beans);
+  } //...
+}
+
+class SweetCaffeLatteMachine extends CoffeeMachine {
+  constructor(
+    private beans: number,
+    private milk: MilkFrother,
+    private sugar: SugarProvider
+  ); //...
+}
+```
+
+이제 interface를 사용하여 다양한 커피머신을 만들어보자.
+
+```ts
+class FancyMilkSteamer implements MilkFrother {
+  private steamMilk(): void {
+    console.log("고급 우유 거품을 내는 중입니다..");
+  }
+  makeMilk(cup: CoffeeCup): CoffeeCup {
+    this.steamMilk;
+    return {
+      ...cup,
+      hasMilk: true,
+    };
+  }
+}
+
+class ColdMilkSteamer implements MilkFrother {
+  private steamMilk(): void {
+    console.log("차가운 고급 우유 거품을 내는 중입니다..");
+  }
+  makeMilk(cup: CoffeeCup): CoffeeCup {
+    this.steamMilk;
+    return {
+      ...cup,
+      hasMilk: true,
+    };
+  }
+}
+
+class FancySugarMixer implements SugarProvider {
+  private getSugar(): boolean {
+    console.log("고급 설탕을 가져옵니다.");
+    return true;
+  }
+  addSugar(cup: CoffeeCup): CoffeeCup {
+    const sugar = this.getSugar();
+    return {
+      ...cup,
+      hasSugar: sugar,
+    };
+  }
+}
+```
+
+동일한 class를 이용함에도 불구하고 sugar를 전달만 해줘도 다른 객체를 만들 수 있다. SweetCoffeeMaker class의 코드를 재사용하면서 원하는 부품을 가져다가 서로 다른 객체를 만들 수 있다. 그래서 내가 원하는 용도에 따라서 SweetCoffeeMaekr를 다르게 사용할 수 있다. 라떼머신들도 마찬가지다. 원하는 기능들을 조립하여 내가 어떤 커피 기계를 만들건지 결정할 수 있다.
+
+```ts
+const cheeepMilkMaker = new CheapMilkSteamer();
+const fancyMilkMaker = new FancyMilkSteamer();
+const coldMilkMaker = new ColdMilkSteamer();
+
+const candySugar = new AutomaticSugarMixer();
+const sugar = new FancySugarMixer();
+
+const sweetCandyMachine = new SweetCoffeeMaker(12, candySugar);
+const sweetMachine = new SweetCoffeeMaker(12, sugar);
+
+const latteMachine = new CaffeeLatteMachine(12, "SN-1010", cheeepMilkMaker);
+const coldLatteMachine = new CaffeeLatteMachine(12, "SN-1010", coldMilkMaker);
+const fancyLatteMachine = new CaffeeLatteMachine(12, "SN-1010", fancyMilkMaker);
+const sweetLatteMachine = new SweetCaffeLatteMachine(
+  12,
+  cheeepMilkMaker,
+  candySugar
+);
+```
+
+이제 우리가 원하는 milkMaker와 sugarMaker를 전달할 수 있기 때문에 많은 종류의 커피머신이 필요하지 않다. 즉, 우리가 만들어낸 수많은 자식 class들이 필요가 없어졌다. 이제는 CoffeeMachine 하나만 있으면 모든 커피를 만들 수 있다. CaffeeLatteMachine, SweetCoffeeMaker, SweetCaffeLatteMachine와 같은 커피머신들을 모두 지우고 기본기능(우유거품기, 설탕제조기)들만 남긴다. 이제 CoffeeMachine에 여러 기능들을 추가해보자. 우유거품과 설탕 모두 CoffeeMachine에서 추가할 수 있다.
+
+커피를 만들 때는 앞으로 커피콩, 우유, 설탕을 전달받을 것이다. makeCoffee에서 커피 뿐만 아니라 설탕과 우유도 반환해준다.
+
+```ts
+class CoffeeMachine implements CoffeeMaker {
+  protected static BEANS_GRAM_PER_SHOT: number = 7;
+  private coffeeBeans: number = 0;
+
+  constructor(
+    coffeeBeans: number,
+    private milk: MilkFrother,
+    private sugar: SugarProvider
+  ) {
+    this.coffeeBeans = coffeeBeans;
+  }
+  //...
+  makeCoffee(shots: number): CoffeeCup {
+    this.grindBeans(shots);
+    this.preHeat();
+    const coffee = this.extract(shots);
+    const sugarAdded = this.sugar.addSugar(coffee);
+    return this.milk.makeMilk(sugarAdded);
+  }
+}
+```
+
+우리가 커피머신을 만들 때, 어떤 곳에는 우유나 설탕이 들어가지 않는 경우가 있었다. 이런 경우도 충분히 구현할 수 있다. 우유와 설탕을 넣지 않는 새로운 class를 만들어보자. 우유와 설탕은 전달받지 않고 CoffeeCup을 리턴해주면 된다.
+
+```ts
+class NoMilk implements MilkFrother {
+  makeMilk(cup: CoffeeCup): CoffeeCup {
+    return cup;
+  }
+}
+
+class NoSugar implements SugarProvider {
+  addSugar(cup: CoffeeCup): CoffeeCup {
+    return cup;
+  }
+}
+```
+
+이제 CoffeeMachine을 사용하여 다양한 객체들을 만들 수 있다.
+
+```ts
+//우유 거품기
+const cheeepMilkMaker = new CheapMilkSteamer();
+const fancyMilkMaker = new FancyMilkSteamer();
+const coldMilkMaker = new ColdMilkSteamer();
+const noMilk = new NoMilk();
+//설탕 제조기
+const candySugar = new AutomaticSugarMixer();
+const sugar = new FancySugarMixer();
+const noSugar = new NoSugar();
+
+const sweetCandyMachine = new CoffeeMachine(12, noMilk, candySugar);
+const sweetMachine = new CoffeeMachine(12, noMilk, sugar);
+
+const latteMachine = new CoffeeMachine(12, cheeepMilkMaker, noSugar);
+const coldLatteMachine = new CoffeeMachine(12, coldMilkMaker, noSugar);
+const sweetLatteMachine = new CoffeeMachine(12, cheeepMilkMaker, candySugar);
+```
+
+이렇게 상속을 이용하지 않고 composition을 통해 CoffeeMachine으로 우리가 원하는 오브젝트를 만들 수 있다. 내가 원하는 기능을 추가하여 원하는 것들을 가져와 조립하며 사용할 수 있다. 그렇다고 해서 상속이 나쁜 것은 아니다. 상속도 유용하며 꼭 필요한 경우가 있다. 하지만 코드를 짜면서 내가 너무 수직적인 관게를 만들고 있는 건 아닌지 꼭 확인해보아야 한다. 상속의 관계가 지나치게 깊다면 composition을 통해 대체할 수 없는지 확인해보자. composition을 이용해서 조금 더 필요한 기능들을 조립해서 확장이 가능하며 재사용성이 높고 유지보수가 쉬운 코드를 만들 수 있다.
+
+한 가지 유의해야할 점이 있다.
+
+> 오버엔지니어링은 하지 말 것!
+
+타이트한 일정 내에 어떤 기능을 구현해야 할 떄가 있다. 기능 구현보다 코드의 개선에 집중한다면 기간 내에 만들지 못하게 된다. 아직 일어나지도 않은 일을 대비해가며 코드개선에 시간을 투자하지 않아도 된다. 기능을 구현하고 차근차근 개선해 나가는 것이 중요하다.
+
+---

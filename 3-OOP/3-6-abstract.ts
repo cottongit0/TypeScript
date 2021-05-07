@@ -9,15 +9,12 @@
     makeCoffee(shots: number): CoffeeCup;
   }
 
-  class CoffeeMachine implements CoffeeMaker {
+  abstract class CoffeeMachine implements CoffeeMaker {
     protected static BEANS_GRAM_PER_SHOT: number = 7;
     private coffeeBeans: number;
 
     constructor(coffeeBeans: number) {
       this.coffeeBeans = coffeeBeans;
-    }
-    static makeMachine(coffeeBeans: number): CoffeeMachine {
-      return new CoffeeMachine(coffeeBeans);
     }
 
     fillCoffeeBeans(beans: number) {
@@ -43,14 +40,7 @@
       console.log("커피머신을 예열 중입니다. 기다려주세요.");
     }
 
-    extract(shots: number): CoffeeCup {
-      console.log(`${shots}개의 샷을 추출하고 있습니다.`);
-      return {
-        shots,
-        hasMilk: false,
-        hasSugar: false,
-      };
-    }
+    protected abstract extract(shots: number): CoffeeCup;
 
     makeCoffee(shots: number): CoffeeCup {
       this.grindBeans(shots);
@@ -66,29 +56,24 @@
     private steamMilk(): void {
       console.log("우유를 스팀 중입니다...");
     }
-    makeCoffee(shots: number): CoffeeCup {
-      const coffee = super.makeCoffee(shots);
+    protected extract(shots: number): CoffeeCup {
       this.steamMilk();
-
       return {
-        ...coffee,
+        shots,
         hasMilk: true,
       };
     }
   }
 
   class SweetCoffeeMaker extends CoffeeMachine {
-    constructor(beans: number) {
-      super(beans);
-    }
-    private addSugar() {
+    private getSugar() {
       console.log("설탕을 추가합니다.");
     }
-    makeCoffee(shots: number): CoffeeCup {
-      const coffee = super.makeCoffee(shots);
-      this.addSugar();
+    protected extract(shots: number): CoffeeCup {
+      this.getSugar();
       return {
-        ...coffee,
+        shots,
+        hasMilk: false,
         hasSugar: true,
       };
     }
@@ -99,10 +84,8 @@
   console.log(sugar);
 
   const machines: CoffeeMaker[] = [
-    new CoffeeMachine(16),
     new CaffeeLatteMachine(16, "SN-1010"),
     new SweetCoffeeMaker(16),
-    new CoffeeMachine(16),
     new CaffeeLatteMachine(16, "SN-1010"),
     new SweetCoffeeMaker(16),
   ];
