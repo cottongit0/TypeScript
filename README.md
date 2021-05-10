@@ -1885,3 +1885,124 @@ const sweetLatteMachine = new CoffeeMachine(12, cheeepMilkMaker, candySugar);
 타이트한 일정 내에 어떤 기능을 구현해야 할 떄가 있다. 기능 구현보다 코드의 개선에 집중한다면 기간 내에 만들지 못하게 된다. 아직 일어나지도 않은 일을 대비해가며 코드개선에 시간을 투자하지 않아도 된다. 기능을 구현하고 차근차근 개선해 나가는 것이 중요하다.
 
 ---
+
+## OOP 연습하기 - 단일연결리스트
+
+Stack을 구현해보자. push라는 함수를 통해 문자열을 집어넣고 pop이라는 함수를 통해 맨 마지막 문자열을 빼낼 것이다. 단, 배열 API의 사용없이 구현해야 한다.
+
+먼저 Stack을 구현해보기 전에 class에 어떤 API를 가지고 있는지 규격을 정의해야 한다. 앞서 배운 `interface`를 활용해보자.
+
+> interface로 작성하면 나중에 스택 코드를 바꾸거나 다른 종류의 스택을 도입하더라도 사용하는 곳에서는 코드를 변경하지 않아도 되기 때문에 편리하게 이용할 수 있다.
+
+Stack에는 크게 두 가지 기능이 있다. value라는 string타입을 넣을 수 있는 `push`와 value를 순서대로 꺼내오는 `pop`이다. 그리고 몇 개의 문자열이 들어왔는지 확인할 수 있는 `size`도 필요하다. 이 size는 외부에서 변경할 수 없고 오직 내부에서만 결정된다. `readonly`로 설정하여 외부에서 값을 변경하지 못하도록 막는다.
+
+```ts
+interface Stack {
+  push(value: string): void;
+  pop(): string;
+  readonly size: number;
+}
+```
+
+class의 기본 구조부터 만들어보자. Stack에서 구현된 모든 아이들이 구현되어 있어야 한다. size라는 멤버변수가 있다. size는 내부에서면 변경이 가능하다. 외부에서는 접근할 수 없도록 `private`를 설정한다. 문자열의 개수를 확인하는 size는 내부에서만 사용할 수 있다. size의 값은 `getter`를 이용해 받아온다. setter가 없기 때문에 외부에서는 size만 읽을 수 있고 변경할 수는 없다. getter를 사용하면 멤버변수와 이름이 동일해진다. 외부에서 사용하는 것과 내부에서 사용하는 것이 이름이 동일한 경우, 변수명에 `_`를 붙여 구분해준다. size를 딱 보았을 때 내부에서만 쓰이는 변수고 동일한 public 변수가 있다고 이해할 수 있다. getter에서는 this.\_size를 반환해주면 된다.
+
+```ts
+class StackImpl implements Stack {
+  private _size: number = 0;
+
+  get size() {
+    return this._size;
+  }
+}
+```
+
+이제 함수인 push와 pop을 구현해보자. push를 할때마자 size가 증가하고 pop 할때마다 size가 감소한다. 우리는 `단일 연결리스트`를 구현해보기로 했다. 단일 연결리스트에는 `head`가 있으며 head에 할당된 아이들을 이용하 아이템을 하나하나씩 찾아간다. 그래서 사용자가 새로운 문자열(value)를 전달하면 이를 저장하는 것이 아니라 한 단계 감쌀 수 있는 `node`를 만들어낸다 head가 새로 들어온 문자열을 가리킨다. 그리고 node는 새로 들어온 문자열을 찾아간다.
+
+이제 데이터를 한 단계 감싸줄 수 있는 node가 필요하다. 데이터를 담고 있는 데이터 타입이기 때문에 이를 `type`으로 정의해줄 수 있다. `StackNode`라는 타입은 value(string)가 있고 다른 스택노드를 가리킬 수 있는 next가 있다. next는 스택노드를 가리키고 있거나 가리키지 않을 수 있다. 아이템이 아무것도 없을 때는 아무것도 가리키지 않는다. 그래서 next는 `optional`이다.
+
+한 단계 감싸줄 수 있는 무언가를 만들 때에는 `불변성`을 유지하는 것이 있다. 전달된 값이 있다면 이 값이 들어왔을 때 내용물이 변경되지 않도록 유지해야 한다. 그래서 `readonly`를 이용해서 value와 next값이 변경되지 않도록 만들어줘야 한다.
+
+```ts
+type StackNode = {
+  readonly value: string;
+  readonly next?: StackNode;
+};
+```
+
+push는 새로운 값이 들어오면 노드를 만든 후, head가 새로 들어온 값을 가리키도록 만든다. 그리고 value는 이전 값을 가리킨다. node는 StackNode 데이터 타입을 따라간다. next는 head를 가리킨다.
+
+head를 아직 정의하지 않았다. head는 StackNode를 가리킬 수도 있고 가리키지 않을 수도 있다. 즉 `optional`이다. class 내부에서만 사용되므로 head는 `private`다. head는 새로운 데이터를 가리키며, 새로운 데이터는 이전 node를 가리키도록 만든다.
+
+마지막으로 \_size값을 더해 문자열 추가를 알린다.
+
+```ts
+class StackImpl implements Stack {
+  //...
+  private head?: StackNode;
+
+  push(value: string) {
+    const node: StackNode = {
+      value,
+      next: this.head,
+    };
+    this.head = node;
+    this._size++;
+  }
+}
+```
+
+이제 pop을 구현해보자. head가 가리키고 있는 것을 삭제하는 함수이다. head가 가리키고 있는 node의 value를 반환하면 된다. head가 가리키고 있는 node를 pop이 제거해야 한다. 상수의 node는 pop이 제거하고자 하는 노드이다. 제거하려는 노드는 head가 가리키고 있는 노드이다. 그리고 이 노드는 있을 수도 있고 없을 수도 있다. Stack이 비워져있는 경우에는 this.head가 없기 때문이다. 그래서 조건이 필요하다. Stack이 비워져 있는 경우(null과 undefined), 에러를 발생시키도록 한다.
+
+head가 가리켰던 기존 노드가 삭제되면 다음 것을 가리켜야 한다. 그래서 this.head는 다음 것을 가리키도록 설장한다. 그리고 size를 하나 감소시킨다.
+
+```ts
+class StackImpl implements Stack {
+  //...
+
+  pop(): string {
+    if (this.head == null) {
+      throw new Error("스택이 비어있습니다.");
+    }
+    const node = this.head;
+    this.head = node.next;
+    this._size--;
+  }
+}
+```
+
+이제 제대로 돌아가는지 확인해보자. 스택이 정상적으로 출력되는 것을 확인할 수 있다.
+
+```ts
+const stack = new StackImpl();
+stack.push("cotton1");
+stack.push("cotton2");
+stack.push("cotton3");
+while (stack.size != 0) {
+  console.log(stack.pop());
+}
+```
+
+보통 자료구조를 사용할 때 `contructor`를 이용하여 얼마만큼의 size를 만들건지 인자로 받는 것이 좋다. capacity라는 총 스택의 size를 전달받고 정해진 size내에서 사용할 수 있도록 만든다. 그래서 push를 사용할 때, 용량이 꽉차면 에러메시지를 던져줄 수 있다.
+
+> 자료구조를 만들 때, 어느 정도의 size를 허용할지 `initial value`를 설정해주면 좋다.
+
+```ts
+class StackImpl implements Stack {
+  //...
+  constructor(private capacity: number) {}
+
+  push(value: string): void {
+    if (this.size === this.capacity) {
+      throw new Error("스택이 꽉 찼습니다.");
+    }
+    const node: StackNode = {
+      value,
+      next: this.head,
+    };
+    this.head = node;
+    this._size++;
+  }
+  //...
+}
+const stack = new StackImpl(10);
+```
