@@ -2006,3 +2006,295 @@ class StackImpl implements Stack {
 }
 const stack = new StackImpl(10);
 ```
+
+---
+
+## Generics - 함수
+
+이전에 스택을 배열 API를 사용하지 않고 구현해보았다. 구현한 스택은 오직 문자만 들어가서 재사용성이 떨어진다. 객체나 숫자 등 다양한 것을 넣고 싶어도 문자만 들어간다. 하지만 `Generic`을 이용하면 우리가 만든 스택의 활용성을 높일 수 있다. 재사용성을 높이고 유연하고 확실하게 타입을 보장할 수 있다. Generic을 제대로 공부하면 API문서를 읽거나 오픈소스 프로젝트를 볼 때 많은 도움을 준다.
+
+null인지 아닌지 체크하는 함수를 만들어보자. checkNotNull은 arg에는 숫자가 들어올 수 있고 null이 들어올 수도 있다.null이라면 에러를 출력하고 number가 들어오면 값을 전달해준다.
+
+```ts
+function checkNotNull(arg: number | null): number {
+  if (arg == null) {
+    throw new Error("잘못된 값을 입력했습니다.");
+  }
+  return arg;
+}
+```
+
+이제 실행해보자. 숫자를 넣은 경우, 제대로 값을 출력하지만 null이 입력된 경우 에러를 발생시킨다.
+
+값을 확인하는 함수는 유용하다. 자바스크립트 라이브러리에서 querySelector를 이용하는 경우 요소가 반환될 수 있고 null이 반환될 수 있다. 그래서 아이템이 유효한지 유효하지 않은지 확인하는 함수를 만들면 좋다.
+
+```ts
+console.log(checkNotNull(23));
+console.log(checkNotNull(null));
+```
+
+하지만 우리가 만든 함수는 숫자만 확인할 수 있다. 그렇다고 타입별로 하나하나 구현하기에는 재사용성이 떨어진다. 그럼 어떤 방법을 이용해야 모든 타입을 확인할 수 있는 함수를 만들 수 있을까?
+
+`any`를 사용해보려고 생각하는 사람도 있을 것이다. any라면 모든 타입을 전부 넣을 수 있어서 숫자가 아니어도 함수에 넣을 수 있다. 어떤 인자인지 상관없이 인자가 null이 아닌 경우에만 any를 반환하면 된다. 하지만 타입이 보장되지 않는 문제가 생긴다. 만약 숫자를 전달했는데 숫자가 null이 아니라면 any가 리턴되기 때문에 result는 any가 된다. 타입에 대한 정보가 없기 때문에 타입이 안전하지 않다.
+
+```ts
+function checkNotNullAny(arg: any | null): any {
+  if (arg == null) {
+    throw new Error("유효한 값이 아닙니다.");
+  }
+  return arg;
+}
+const anyResult = checkNotNullAny(23);
+console.log(anyResult); //any!
+```
+
+이럴 떄 `generic`을 이용하면 어떤 타입이든 받을 수 있다. generic은 코딩할 때 타입이 결정하는 덕분에 타입을 안전하게 보장받는다. 함수에서 generic을 이용하는 방식은 비슷하다. 어떤 인자를 받고 어떤 걸 반환할 것인데 이 인자는 `T`이다. 인자는 무엇인지 모르겠지만 T이라는 타입을 받아서 T라는 타입을 리턴한다. T일 수도있고 null일 수도 있다.
+
+이제 이 함수는 어떤 인자를 전달하는지 상관없이 null이 아닐 때만 같은 타입으로 반환하는 함수이다. generic을 이용하면 사용하는 사람이 어떤 타입인지 결정할 수 있고 유연하지만 확실하게 타입을 보장받을 수 있다.
+
+> generic은 타입을 길게 쓰지 않고 대문자 하나만 사용한다.
+
+```ts
+function checkNotNullGeneric<T>(arg: T | null): T {
+  if (arg == null) {
+    throw new Error("유효한 값이 아닙니다.");
+  }
+  return arg;
+}
+const number = checkNotNullGeneric(231);
+const boal: boolean = checkNotNullGeneric(true);
+```
+
+---
+
+## Generics - 클래스
+
+Either라는 interface를 만들어보자. 왼쪽과 오른쪽에 각각 숫자를 받받으며 호출하면 숫자를 반환한다.
+
+```ts
+interface Either {
+  left: () => number;
+  right: () => number;
+}
+```
+
+Either를 구현하는 SimpleEither는 contructor에 두 가지 값을 받아온다. leftValue와 rightValue 모두 숫자 타입을 받아온다. 내부적으로 사용할 것이기 때문에 private를 지정해준다.
+
+그리고 interface에서 구현한 left와 right 함수를 구현해야 한다. left는 leftValue를 반환하고, right는 rightValue를 반환한다.
+
+```ts
+class SimpleEither implements Either {
+  contructor(private leftValue: number, private rightValue: number) {}
+  left(): number {
+    return this.leftValue;
+  }
+  right(): number {
+    return this.rightValue;
+  }
+}
+```
+
+새로운 Either를 만들어 숫자를 전달해주면 값이 반환된다.
+
+```ts
+const either = new SimpleEither(4, 5);
+either.left();
+either.right();
+```
+
+하지만 이 class는 숫자타입만 받아낼 수 있다. 숫자 두 개가 아니라 `어떤 타입이든 받을 수 있도록` 만들려면 generic을 활용하면 된다.
+
+왼쪽과 오른쪽에 다른 타입으로 쓸 수도 있고 같은 타입을 쓸 수 있다. 이것은 사용자의 자유다. 조금 더 유연한 generic 클래스를 만들어보자. 왼쪽 타입과 오른쪽 타입을 generic을 이용해 지정해준다. 이제는 number 타입 대신에 L과 R을 사용할 것이다.
+
+```ts
+interface Either<L, R> {
+  left: () => L;
+  right: () => R;
+}
+class SimpleEither<L, R> implements Either<L, R> {
+  constructor(private leftValue: L, private rightValue: R) {}
+  left(): L {
+    return this.leftValue;
+  }
+  right(): R {
+    return this.rightValue;
+  }
+}
+```
+
+이제는 좀더 유연한 either를 만들 수 있다. SimpleEither에 숫자, 문자열, 객체 상관없이 쓰는 사람이 결정해서 만들 수 있다.
+
+이처럼 generic을 활용하면 활용성이 높은 class나 함술르 만들 수 있다.
+
+```ts
+const best = new SimpleEither({ nmae: "cotton" }, "hello");
+```
+
+---
+
+## Generics - 조건(constrain)
+
+월급을 자동으로 지불할 수 있는 함수를 만들어보자. Employee라는 interface가 있다. 월금을 지불할 수 있는 pay가 내부에 있다.
+
+그리고 직원의 종류는 2개다. 정규직(FullTimeEmployee)와 비정규직(PartTimeEmployee)가 있다. 그리고 이 둘 모두 Employee를 받는다. 내장된 함수 pay는 콘솔에 어떤 직원인지 출력한다. 그리고 내부에는 각각 workFullTime과 workPartTime가 있다.
+
+```ts
+interface Employee {
+  pay(): void;
+}
+
+class FullTimeEmployee implements Employee {
+  pay() {
+    console.log("정규직");
+  }
+  workFullTime() {}
+}
+
+class PartTimeEmployee implements Employee {
+  pay() {
+    console.log("비정규직");
+  }
+  workPartTime() {}
+}
+```
+
+이제 pay 함수를 구현해보자. pay는 자동으로 월급을 지불할 수 있는 함수이다. 이 함수는 employee를 받아온다. 타입은 Employee를 받아서 월급을 지불한 다음, 다시 직원을 반환한다.
+
+```ts
+function pay(employee: Employee): Employee {
+  employee.pay();
+  return employee;
+}
+```
+
+이제 pay 함수를 사용해보자. 정규직과 비정규직 두 가지를 만든다. AfterPay는 해당 직원에게 월급을 준다. 그리고 다시 직원을 반환한다. 하지만 pay가 이루어지고 난 다음에 일할 수 있는 함수를 호출할 수 없다.
+
+pay라는 함수는 유용해보인다. 모든 직원을 받아와서 어떤 직원인지 상관 안하고 interface의 Employee를 받아온다. 그리고 지불한 다음 다시 동일한 Employee를 전달했지만 FullTime이라는 정보를 잃어버린 채로 Employee만 반환된다. 즉, 정규직인지 비정규직인지 세부 클래스 정보를 잃어버리는 것이다.
+
+```ts
+const cotton1 = new FullTimeEmployee();
+const cotton2 = new PartTimeEmployee();
+cotton1.workFullTime();
+cotton2.workPartTime();
+const cotton1AfterPay = pay(cotton1);
+const cotton2AfterPay = pay(cotton2);
+```
+
+이 pay함수를 generic을 이용하여 바꿔보자. T 타입을 통해 employee를 받아올 수 있고 동일한 T를 반환한다. 이렇게 하면 받아온 employee를 타입 그대로 반환할 수 있다. 하지만 이 employee에는 pay라는 함수가 없다. 코딩하는 시점에서는 employee에 pay가 있는지 없는지 확인할 수 없기 때문에 사용할 수 없다.
+
+이때 좀더 세부적인 조건을 달 수 있다. 일반 타입이지만 `extends(상속)`을 이용하면 오직 Employee를 확장한 타입만 가능하도록 만들 수 있다. 이제 pay함수를 꺼내 사용할 수 있다. 이제 Employee를 구현한 어떠한 오브젝트든 전달할 수 있다. 하지만 다른 타입을 전달하면 에러를 발생시킨다.
+
+이처럼 generic도 조건을 걸어둠으로써 조금 더 제한적인 범위네에서 generic을 사용할 수 있다.
+
+```ts
+function pay<T extends Employee>(employee: T): T {
+  employee.pay();
+  return employee;
+}
+```
+
+새로운 generic 함수를 만들어보자. 오브젝트가 있다. 오브젝트에는 이름과 나이가 있다. 그리고 getValue라는 함수를 통해 오브젝트를 전달하고 오브젝트에 있는 키값을 전달하면 오브젝트의 value를 반환한다. 타입이 보장되면서 이러한 기능을 할 수 있는 함수는 어떻게 만들 수 있을까?
+
+```ts
+const obj = {
+  name: "cotton",
+  age: 10,
+};
+console.log(getValue(obj, "name"));
+```
+
+getValue는 오브젝트와 키를 받아온다. 오브젝트와 키는 어떠한 타입을 받아온다. 그리고 함수는 어떠한 타입을 반환한다. 이 부분을 generic을 이용하여 구현해보자. 우선 이 함수는 T라는 어떠한 오브젝트를 받아올 수 있다. 대신에 여기에 전달되는 것은 오브젝트 안에 있는 키 중 하나여야 한다. K는 오브젝트 T안에 있는 키들 중 하나를 상속한다. `keyof`는 오브젝트 안에 들어있는 키 타입을 말한다. 따라서 K는 T의 키 값을 상속한다. 그리고 반환되는 값은 타입을 보장해야 하기 때문에 오브젝트 T에 있는 value 값을 리턴하게 된다.
+
+```ts
+function getValue<T, K extends keyof T>(obj: T, key: K): T[K] {
+  return obj[key];
+}
+```
+
+---
+
+## Generics - Stack
+
+이전에 stack을 구현했었다. 하지만 우리가 구현했던 stack은 string타입만 받을 수 있는 사용성이 떨어지는 자료구조이다. 이제 Stack을 어떤 타입이든지 받을 수 있는 활용성높은 stack으로 만들어보자.
+
+받아왔던 모든 string 타입을 T 타입으로 변경해준다. generic을 이용할 떄는 인터페이스, 함수, 클래스 정의 부분 모두 T로 정의해야 한다.
+
+Stack이라는 인터페이스는 T라는 타입을 받을 수 있다. push를 하게 되면 T타입을 전달해주고 pop을 하면 T타입이 반환된다.
+
+```ts
+interface Stack<T> {
+  push(value: T): void;
+  pop(): T;
+  readonly size: number;
+}
+```
+
+StackNode는 T라는 것을 정의한다. value는 T를 리턴하고 next는 동일한 T타입의 StackNode를 가리킬 수 있다.
+
+```ts
+type StackNode<T> = {
+  readonly value: T;
+  readonly next?: StackNode<T>;
+};
+```
+
+Class도 마찬가지다. T라는 것을 정의한 다음에 인터페이스를 구현하는 부분에 동일한 타입을 이용한다. head도 동일한 타입의 StackNode를 가리킬 수 있다.
+
+```ts
+class StackImpl<T> implements Stack<T> {
+  private _size: number = 0;
+  private head?: StackNode<T>;
+  value: T;
+
+  constructor(private capacity: number) {}
+
+  get size() {
+    return this._size;
+  }
+
+  push(value: T): void {
+    if (this.size === this.capacity) {
+      throw new Error("스택이 꽉 찼습니다.");
+    }
+    const node: StackNode<T> = {
+      value,
+      next: this.head,
+    };
+    this.head = node;
+    this._size++;
+  }
+  pop(): T {
+    if (this.head == null) {
+      throw new Error("스택이 비어있습니다.");
+    }
+    const node = this.head;
+    this.head = node.next;
+    this._size--;
+    return node.value;
+  }
+}
+```
+
+하지만 인스턴스를 생성할 때, 값이 unknown으로 명시되어 있다. 이는 타입을 명시해주면 해결된다. generic을 사용할 때는 타입을 정확하게 명시하여 unknown이 나오지 않도록 주의해야 한다.
+
+```ts
+const stack = new StackImpl<string>(10);
+stack.push("cotton1");
+stack.push("cotton2");
+stack.push("cotton3");
+while (stack.size != 0) {
+  console.log(stack.pop());
+}
+```
+
+다른 타입의 Stack도 이제 만들 수 있다.
+
+```ts
+const stack2 = new StackImpl<number>(10);
+stack2.push(123);
+stack2.push(342);
+stack2.push(543);
+while (stack2.size != 0) {
+  console.log(stack2.pop());
+}
+```
