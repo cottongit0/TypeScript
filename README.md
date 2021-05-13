@@ -284,12 +284,12 @@ function printArray(fruits: readonly string[]) {}
 function printArray(scores: readonly Array<number>) {} //ERROR!
 ```
 
-두 방식의 차이점은 `readonly`의 사용여부이다. 오브젝트 타입으로 선언된 배열은 `readonly`를 사용할 수 없다. 만약 읽기 전용으로 배열을 만들고 싶다면 `[]`를 이용해서 변수를 생성해야 한다.
+두 방식의 차이점은 `readonly`의 사용여부이다. 오브젝트 타입으로 선언된 배열은 readonly를 사용할 수 없다. 만약 읽기 전용으로 배열을 만들고 싶다면 `[]`를 이용해서 변수를 생성해야 한다.
 
 `오브젝트의 불변성`을 보장하는 것은 굉장히 중요하다. 그래서 `readonly`를 많이 사용하게 된다. 일관성 있는 코드를 짜고 싶다면 `[]`를 이용하여 타입을 선언하는 것이 좋다.
 
-[Tuple]
-원래 배열에는 `한가지 타입`만 허용할 수 있다. 하지만 `tuple(튜플)`을 이용하면 서로 다른 타입을 가진 데이터를 담을 수 있다.
+[Tuple] <br/>
+원래 배열에는 `한가지 타입`만 허용할 수 있다. 하지만 `tuple`을 이용하면 서로 다른 타입을 가진 데이터를 담을 수 있다.
 
 ```ts
 let student: [string, number];
@@ -342,7 +342,7 @@ const student: Student = {
 };
 ```
 
-[String Listeral Types]
+[String Listeral Types] <br/>
 타입을 `문자열`도 지정할 수 있다.
 
 ```ts
@@ -425,7 +425,7 @@ LoginState라는 union 타입을 추가하여 묶을 수 있다. 이러면 함�
 
 이처럼 union은 발생할 수 있는 다양한 케이스 중에 하나만 정하고 싶을 떄 많이 사용한다.
 
-어떤 타입(LoginState)냐에 따라서 다르게 출력되는 것을 구현해보자. 성공(SuccesState), 실패(FailState)에 따라 다르게 출력시킨다.
+어떤 타입(LoginState)이냐에 따라서 다르게 출력되는 것을 구현해보자. 성공(SuccesState), 실패(FailState)에 따라 다르게 출력시킨다.
 
 printLoginState 함수는 state를 인자로 받아온다. 타입은 LoginState로 union타입으로 직접 만든 타입이다. 아무것도 리턴하지 않으므로 함수의 리턴 타입은 void다. state의 값이 무엇이냐에 따라서 성공시 body를 출력하고 실패시 reason을 출력해야 한다.
 
@@ -2296,5 +2296,426 @@ stack2.push(342);
 stack2.push(543);
 while (stack2.size != 0) {
   console.log(stack2.pop());
+}
+```
+
+---
+
+# API
+
+코딩을 하다보면 자바스크립트나 언어 자체에서 혹은 라이브러리에서 제공하는 API를 이용할 때, 공식문서를 볼 수도 있으나 API가 정의된 곳으로 가서 어떤 스펙으로 작성되었는지 확인하는 것이 빠르다. 해당 API에 ctrl을 누른 상태로 마우스를 누르면 정의되어 있는 곳을 볼 수 있다.
+
+```ts
+Array;
+```
+
+이런 파일들은 자바스크립트에서 만들어져 정의된 파일이 아니라 `VS code 설치시 타입스크립트가 같이 설치되면서 딸려 나온 파일`들이다. `d`라고 하는 것은 타입이 정의되어져 있는 Type definition 또는 Type declaration라고 한다. 자바스크립트 코드를 작성하거나 자바스크립트 언어 자체에서 제공 혹은 DOM 요소를 조작할 수 있는 DOM api를 사용할 때, 타입이 없는 자바스크립트만 이용하기 어려우니 명확하게 타입이 어떤 것인지 확인할 수 있도록 타입을 정의해둔 파일이다.
+
+<img src="./images/API1.png">
+
+---
+
+# Exception Handling
+
+`Exception Handling`는 프로그래밍에서 필수적으로 처리해야 한다. 어플리케이션을 사용하다보면 예상하지 못한 오류가 발생하거나 메모리에 문제가 있는 등 심각한 상황이 발생하여 어플리케이션이 죽는 경우가 있다. Exeption은 `예상하지 못한 Error`를 의미한다. 이러한 Exception을 사용자가 사용하게 둘 것이 아니라 Exception을 잘 처리하고 Handling하는 것이 중요하다. Exception을 잘 처리하면 `안정성`도 높아질 뿐만 아니라 `유지보수성`도 높아진다. 최대한 어플리케이션 내부에서 해결해야 하며, 만약 문제가 발생한다면 사용자에게 알려주는 역할을 해야 한다.
+
+어플리케이션 내부에서 코딩할 때, 예상할 수 있는 것을 `Error State`라고 한다. 많은 사람들이 에상할 수 있는 Error임에도 불구하고 Exception으로 간주해서 처리하지 않거나 잘못 처리하는 경우가 있다. 우리가 예상할 수 있는 혹은 예상되어지는 Error state인지, 혹은 예상하지 못한 Error Exception인지 구분해서 사용할 필요가 있다. Error는 우리가 예상할 수 있는 어플리케이션 내부에서 발생할 수 있는 Error 케이스를 의미한다. Exception은 전혀 예상하지 못하는 상태를 말한다. 이제 예상되는 Error와 예상하지 못한 Exception을 어떻게 처리할 수 있는지 알아보자.
+
+## Exception Handling - Error
+
+다른 프로그래밍 언어에서는 exception이라는 클래스 오브젝트가 있다. 하지만 자바스크립트나 타입스크립트에서는 `Error`라는 클래스가 있다.
+
+에러가 발생하는 예시를 확인해보자. array를 수용할 수 없을 정도로 커다란 범위의 배열로 만들어보자. 생성할 수 있는 배열의 개수보다 많이 생성하게 되면 Error는 발생시키지 않고 경고메시지가 나온다.
+
+```ts
+const array = new Array(10000000000000000000);
+```
+
+> 절댓값이 2^53보다 크거나 같은 숫자 리터럴은 너무 커서 정수로 정확하게 표시할 수 없습니다.
+
+이를 실행해보면 Error가 발생하는 것을 확인할 수 있다. RangeError는 Errror 클래스를 상속한 조금 더 세부적인 Error클래스이다. Error를 확인해보면 유효하지 않은 배열의 개수를 사용한다고 에러를 송출했다. 이처럼 전혀 예상하지 못한 이슈가 발생했을 때, 사용할 수 있는 것이 Error다.
+
+> RangeError: Invalid array length
+
+우리가 기존에 만들었던 game.ts를 확인해보자. Switch문에서도 Error를 사용한 걸 확인할 수 있다. move라는 함수를 호출할 때 전달될 수 있는 모든 union타입에 대해서 각각의 case별로 처리하고 case를 제대로 처리하지 않으면 Error를 발생시킨다. 만약 이 함수를 쓰는 개발자들이 새로운 타입을 추가하면 어떻게 될까?
+
+```ts
+function move(direction: Direction) {
+  switch (direction) {
+    case "up":
+      position.y = position.y + 1;
+      break;
+    case "down":
+      position.y = position.y - 1;
+      break;
+    case "left":
+      position.x = position.x - 1;
+      break;
+    case "right":
+      position.x = position.x + 1;
+      break;
+    default:
+      throw new Error("Unknown command");
+  }
+}
+```
+
+새로운 타입 front가 추가되었다. 이 case를 제대로 handling하지 않으면 Error가 발생한다. API를 사용하는 사람들에게 이렇게 사용하는 것은 잘못된 것임을 알려주는 Error를 던질 수 있다. 하지만 이런 경우 실시간으로 Error가 나오는 것보다는 `컴파일 단게에서 Error를 발생`시켜 알리는 것이 좋다. 개발자가 front를 추가했다면 컴파일을 돌릴 때, Error가 발생해서 컴파일 시간 때 수정할 수 있도록 해야 한다. front를 추가했지만 컴파일에서는 아무런 경고를 발생시키고 있지 않다. 이럴 때 사용할 수 있는 방법이 있다.
+
+```ts
+type Direction = "up" | "down" | "left" | "right" | "front";
+
+let position = { x: 0, y: 0 };
+
+function move(direction: Direction) {
+  switch (direction) {
+    case "up":
+      position.y = position.y + 1;
+      break;
+    case "down":
+      position.y = position.y - 1;
+      break;
+    case "left":
+      position.x = position.x - 1;
+      break;
+    case "right":
+      position.x = position.x + 1;
+      break;
+    default:
+      throw new Error("Unknown command");
+  }
+}
+```
+
+const invalid라는 변수에 반환하지 못하는 never 타입을 지정해준다. 그리고 invalid에 direction을 할당한다. invalid를 사용하지 않았기 때문에 에러를 발생시킨다. Error문에 invalid를 사용하면 기존의 에러가 사라지고 다른 에러를 발생시킨다.
+
+> string 형식은 never 형식에 할당할 수 없습니다.
+
+case에 들어오지 않고 default로 들어와지는 것은 front밖에 없다. string 타입인 front는 never에 할당될 수 없다. 따라서 invalid가 에러를 발생시키고 있는 것이다. 이 방식으로 사용자에게 컴파일할 때 에러를 알려줄 수 있다.
+
+```ts
+function move(direction: Direction) {
+  switch (direction) {
+    case "up":
+      position.y = position.y + 1;
+      break;
+    case "down":
+      position.y = position.y - 1;
+      break;
+    case "left":
+      position.x = position.x - 1;
+      break;
+    case "right":
+      position.x = position.x + 1;
+      break;
+    default:
+      const invalid: never = direction;
+      throw new Error(`Unknown command ${invalid}`);
+  }
+}
+```
+
+이제 case에 front를 추가해보자. 더이상 컴파일 에러를 발생시키지 않는다. 타입스크립트 컴파일러가 모든 case가 다 되며 default에 올 수 있는 값은 never밖에 없음을 확인한 덕분이다. direction에 있던 모든 case를 다 다뤘으므로 never가 된다. never는 never에 할당되고 Error를 발생시킨다.
+
+```ts
+function move(direction: Direction) {
+  switch (direction) {
+    case "up":
+      position.y = position.y + 1;
+      break;
+    case "down":
+      position.y = position.y - 1;
+      break;
+    case "left":
+      position.x = position.x - 1;
+      break;
+    case "right":
+      position.x = position.x + 1;
+      break;
+    case "front":
+      console.log("front");
+      break;
+    default:
+      const invalid: never = direction;
+      throw new Error(`Unknown command ${invalid}`);
+  }
+}
+```
+
+---
+
+## Error Handling - try, catch, finally
+
+Error Handling 혹은 다른 프로그래밍 언어에서는 Exception이라고 많이 사용한다. 이 Error handling은 3가지 단계로 나눠진다. 에러가 발생할 수 있는 부분을 `시도(try)`하고 에러가 발생한다면 `잡아(catch)`내고 에러 발생유무와 관계없이 `마무리 단계로 finally`를 이용한다. 정말 심각한 오류라면 어플리케이션이 죽겠지만 메모리에 문제가 있거나 복구할 수 없는 심각한 문제의 경우, 어느 정도 처리할 수 있다면 try와 catch를 이용해 에러를 잡아내고 조금 더 의미있는 에러메시지를 사용자에게 보여준다던지 복구하기 위한 노력을 할 수 있다. 이를 데모로 확인해보자.
+
+파일을 읽을 수 있는 함수가 있다. 파일의 이름을 전달해주면 파일을 읽어서 파일의 내용을 문자열 형태로 전달해주는 함수이다. 여기서 이 전달된 파일이 존재하지 않으면 읽을 수 없다. 파일의 이름이 존재하지 않는다면 파일이 있는지 없는지 확인하고 불러야 된다는 `Error`를 던져줘야 한다. 그래서 파일이름이 잘못되었다는 것을 이해할 수 있다. 파일이 존재하지 않을 때는 에러를 던지고, 파일이 있을 때만 컨텐츠를 전달해준다.
+
+```ts
+function readFile(fileName: string): string {
+  if (fileName === "존재하지 않는 파일이름") {
+    throw new Error(`해당 이름의 파일이 존재하지 않습니다. ${fileName}`);
+  }
+  return `파일 내용`;
+}
+```
+
+파일을 읽으면 항상 닫아야 하는 함수가 있다. 프로그래밍 언어에서는 통상적으로 열면 닫아야 되는게 정해져 있다. 그래서 여기에서도 동일하게 파일이름을 전달하면 이 파일을 닫을 수 있는 아무것도 하지 않는 함수가 있다.
+
+```ts
+function closeFile(fileName: string) {}
+```
+
+이제 이 함수를 사용해보자. 정상적으로 출력된 것을 확인할 수 있다. 이제 존재하지 않는 파일이름을 입력해보자.
+
+```ts
+const file = "Cotton";
+console.log(readFile(file));
+closeFile(file);
+```
+
+어플리케이션이 죽으면서 우리가 작성한 에러문이 호출된다. 그리고 에러가 어디서 발생했는지 정확한 위치정보와 함께 콜스택도 보여준다.
+
+> Error: 해당 이름의 파일이 존재하지 않습니다. 존재하지 않는 파일이름
+> (D:\Coding\GitCotton0\Lecture\TypeScript\8-exception\8-1-exception.ts:15:13)
+
+```ts
+const notExist = "존재하지 않는 파일이름";
+console.log(readFile(notExist));
+closeFile(notExist);
+```
+
+이처럼 예상하지 못한 에러가 발생할 수 있는 함수를 사용할 때는 에러가 발생할 수 있는 정확한 부분에 `try`를 이용해서 감싸주면 된다. 그래서 한번 `시도(try)`했다가 문제가 생기면 에러를 `잡게(catch)`한다. catch의 인자의 이름은 주로 e 혹은 error라고 쓰기도 한다. 그래서 try 했다가 에러가 발생하면 catch 문으로 들어오게 된다. catch문에는 에러를 확인했다는 문구를 콘솔에 출력하도록 만든다.
+
+다시 실행시켜보면 어플리케이션이 죽지 않는 것을 확인할 수 있다. catch문에서 작성한 '에러 확인'이라는 문구는 확실하게 출력됐지만 어플리케이션은 죽지 않는다. 왜냐하면 발생한 에러를 우리가 잡아냈기 때문에다. 파일을 읽으려고 했지만 읽지 못했다면 catch를 이용해서 에러를 잡은 다음에 dialog를 보여줄 수 있고 적절한 뒷처리를 할 수 있다.
+
+```ts
+const notExist = "존재하지 않는 파일이름";
+try {
+  console.log(readFile(notExist));
+} catch (error) {
+  console.log("에러 확인");
+}
+closeFile(notExist);
+```
+
+마지막으로 `finally`가 있다. 파일을 읽었다면 꼭 닫아줘야 하는 것이 있다. 바로 closeFile이다. 이는 finally에서 실행하는 것이 좋다. try가 성공하든 실패하든 혹은 catch가 호출되든 호출되지 않든 `finally`는 무조건 항상 호출하게 되어 있다. 그래서 문제가 발생할 때도 finally가 호출되고 문제가 없을 때도 finally는 호출된다.
+
+```ts
+try {
+  console.log(readFile(notExist));
+} catch (error) {
+  console.log("에러 확인");
+} finally {
+  closeFile(notExist);
+  console.log("finally 출력");
+}
+```
+
+내가 무언가 시도하고 항상 여기에 성공하든 실패하든지에 상관없이 무언가를 반드시 수행해야 한다면 finally를 사용하는 것이 좋다. 우리가 catch밑에 closeFile을 실행시키면 되지 않을까 생각할 수 있다. 하지만 catch 내부에서 무슨 일이 발생할지 알 수 없다.
+
+run이라는 함수가 있다. 기존에 있던 것에서 finally문을 제거하고 closeFile함수를 실행시켜보자. 그리고 콘솔에 닫힘을 알리는 로그를 출력한다. 내부에서 아무런 문제가 없어서 정상적으로 닫아지고 log가 출력된다.
+
+```ts
+function run() {
+  const fileName = "존재하지 않는 파일이름";
+  try {
+    console.log(readFile(notExist));
+  } catch (error) {
+    console.log("에러 확인");
+  }
+  closeFile(fileName);
+  console.log("닫기");
+}
+run();
+```
+
+만약 catch안에서 에러가 발생하여 더이상 밑의 코드를 실행할 필요없이 리턴시킨다면 어떻게 될까? catch문만 실행되고 밑에 파일닫기는 실행되지 않는다. 이처럼 catch 안에서 무언가 처리할 때 다른 에러가 발생하거나 반환되는 경우 파일을 닫을 수 없게 된다. 그래서 try하는 것과 항상 마지막에 마무리 해야되는 것이 있다면 `finally`안에서 하는 것이 좋다.
+
+```ts
+function run() {
+  const fileName = "존재하지 않는 파일이름";
+  try {
+    console.log(readFile(notExist));
+  } catch (error) {
+    console.log("에러 확인");
+    return;
+  }
+  closeFile(fileName);
+  console.log("닫기");
+}
+run();
+```
+
+finally에 파일 닫기에 대한 내용을 추가해보자. catch가 반환되었음에도 불구하고 finally는 호출됨을 확인할 수 있다. 이처럼 이 finally 안에 있는 코드는 에러가 발생하여 catch가 되어도 `항상 실행한다`는 것을 보장한다.
+
+```ts
+function run() {
+  const fileName = "존재하지 않는 파일이름";
+  try {
+    console.log(readFile(notExist));
+  } catch (error) {
+    console.log("에러 확인");
+    return;
+  } finally {
+    closeFile(fileName);
+    console.log("닫기");
+  }
+}
+run();
+```
+
+try 안에서는 여러 코드를 작성하는 것보다는 정말 에러가 발생하는 부분만 try로 감싸서 catch하고 finally하는 것이 좋다.
+
+---
+
+## Error Handling
+
+새로운 class를 만들어보자. NetworkClient라는 클래스이다. 이는 tryConnect를 이용해 네트워크에 연결해준다. 만약 네트워크가 불안정하다면 에러를 던진다.
+
+```ts
+class NetworkClient {
+  tryConnect(): void {
+    throw new Error("네트워크 연결이 끊어졌습니다.");
+  }
+}
+```
+
+그리고 또 다른 클래스인 UserService가 있다. 클라이언트를 받아와서 필요한 것을 외부에서 받아오는 compostion dependency injection이다. 내부에서만 변경될 수 있도록 private로 설정한다. 그리고 클라이언트를 받아와서 로그인할 수 있는 함수가 있다. this.client의 tryConnect로 서버에 연결한 다음 로그인하는 로직들이 있다.
+
+```ts
+class UserService {
+  constructor(private client: NetworkClient) {}
+  login() {
+    this.client.tryConnect();
+    //login...
+  }
+}
+```
+
+이 class들을 사용해보자. NetworkClient를 먼저 만들고 UserService를 만든다. new UserService에는 미리 만든 client를 전달해준다. 이제 service를 이용해서 login을 호출할 수 있다.
+
+실행을 해보면 에러가 발생한 것을 확인할 수 있다.
+
+> Error: 네트워크 연결이 끊어졌습니다.
+
+```ts
+const client = new NetworkClient();
+const service = new UserService(client);
+service.login();
+```
+
+다른 예시도 확인해보자. App이라는 클래스가 있다. 이 클래스 안에는 run이 있다. 이 App안에는 생성자로 UserService를 받아온다. run 함수 안에는 UserService에 로그인을 한번 한다. 즉 App이 시작하면 자동으로 로그인하는 구조이다.
+
+```ts
+class App {
+  constructor(private userService: UserService) {}
+  run() {
+    this.userService.login();
+  }
+}
+```
+
+이제 App을 실행해보자. service를 app에 전달하고 app을 실행시킨다. 동일하게 에러가 발생하는 것을 확인할 수 있다. 이번엔 에러가 발생한 부분을 자세히 확인해보자.
+
+```ts
+const client = new NetworkClient();
+const service = new UserService(client);
+const app = new App(service);
+app.run();
+```
+
+> at NetworkClient.tryConnect (D:\Coding\GitCotton0\Lecture\TypeScript\8-exception\8-2-handling.ts:3:11)<br/>at UserService.login (D:\Coding\GitCotton0\Lecture\TypeScript\8-exception\8-2-handling.ts:10:17)<br/>at App.run (D:\Coding\GitCotton0\Lecture\TypeScript\8-exception\8-2-handling.ts:22:22)
+
+NetworkClient의 tryConnect라는 함수에서 에러가 발생했다. 그리고 이 함수를 부른 것은 UserService.login이다. 그리고 App에 있는 run이라는 함수에서 UserService.login을 불렀다. 이렇게 다용한 곳에서 아용하다가 에러가 발생한다. 이 경우, 어디에서 try, catch를 사용하는 것이 좋고 어느 부분에서 handling해야할까?
+
+한 번 UserService에 try, catch를 사용해보자. 실행을 해보면 에러가 잡혔고 어플리케이션이 죽지 않았다. 하지만 잡은 에러로 의미있게 할 수 있는 일은 없다. App은 login을 호출했지만 아무것도 받지 못하게 된다.
+
+```ts
+class UserService {
+  constructor(private client: NetworkClient) {}
+  login() {
+    try {
+      this.client.tryConnect();
+    } catch (error) {
+      console.log("에러 확인");
+    }
+    //login...
+  }
+}
+```
+
+에러가 발생했을 때, 정확하게 처리할 수 있는 것이 아니라면 `catch를 하지 않는 것이 낫다.` 그래서 이것을 처리할 수 있는 곳에서 try하는 것이 훨씬 좋다. App에서 try, catch를 이용해보자.
+
+try 즉 로그인을 하고 무언가 에러가 발생했다면 여기에서 조금 더 의미있는 일을 할 수 있다. 에러에 대한 내용을 출력해줄 수 있게 된다.
+
+```ts
+class App {
+  constructor(private userService: UserService) {}
+  run() {
+    try {
+      this.userService.login();
+    } catch (error) {
+      // 유저에게 에러 사항을 출력한다.
+      console.log("에러 확인");
+    }
+  }
+}
+```
+
+예상하지 못한 에러가 발생한다면 try catch Handling을 할 때, 여기서 처리하는 것이 과연 `의미있는 처리`인가를 생각해야 한다. 가장 확실하게 처리할 수 있는 곳에서 `catch`를 사용해야 한다.
+
+---
+
+## Error Handling - Error State
+
+언제 Error를 사용해야 하고 언제 Error State를 사용해야 할까? 만약 tryConnect에 발생할 수 있는 에러의 종류가 많다고 생각해보자. class로 TimeoutError에러와 OfflineError가 있다. 그래서 네트워크 클라이언트가 커넥션을 시도할 때 타임아웃이 될 수도 있고 오프라인이 될 수도 있다.
+
+```ts
+class TimeoutError extends Error {}
+class OfflineError extends Error {}
+```
+
+그래서 조금 더 세부적인 상속된 클래스를 만들어서 에러가 난 종류에 맞게 세부적인 클래스를 던져본다 생각하자. 하지만 아쉬운 문제점은 try catch에 전달되는 에러는 어떠한 타입정보다 전달되지 않는다.
+
+```ts
+class NetworkClient {
+  tryConnect(): void {
+    throw new OfflineError("네트워크 연결이 끊어졌습니다.");
+  }
+}
+```
+
+그래서 try, catch문에서 `instanceof`라는 키워드를 사용하고 싶어도 사용할 수 없다. catch로 에러를 받는 순간 any type이 되기 때문에 타입에 대한 정보가 완전히 사라지기 때문이다. 따라서 Error는 예상하지 못한 곳에서 에러가 발생할 때 사용하는 것이 좋다.
+
+```ts
+class App {
+  constructor(private userService: UserService) {}
+  run() {
+    try {
+      this.userService.login();
+    } catch (error) {
+      if (error instanceof OfflineError) {
+        // 사용불가!
+      }
+    }
+  }
+}
+```
+
+이렇게 세부적인 Error를 결정하고 싶을때는 `ErrorState`를 사용하는 것이 좋다. 네트워크 에러가 발생할 수 있는 것은 코드를 작성할 때 예상할 수 있는 state다. 실패한다면 어떻게 실패할 수 있을지 예상할 수 있다. 그래서 예상하지 못하게 throw를 남발해선 안된다. tryConnect가 실행된 후에는 어떤 상태가 되는지 ResultState를 반환하게 만들어보자.
+
+ResultState는 union 타입이다. 성공할 수도 있고 실패할 수도 있다. 실패할 경우에는 NetworkErrorState가 있으며 성공하는 경우 SuccessState가 있다. result에는 각각 성공과 실패를 구분짓는 `Discriminated union`을 이용한다. 실패했다면 왜 실패했는지 reason을 세부적으로 작성한다. 나중에 이 에러들을 Handling할 때 적절한 에러메시지를 사용자에게 보여준다면 적절한 대처를 할 수 있을 것이다.
+
+```ts
+type NetworkErrorState = {
+  result: "fail";
+  reason: "offline" | "down" | "timeout";
+};
+type SuccessState = {
+  result: "success";
+};
+type ResultState = SuccessState | NetworkErrorState;
+class NetworkClient {
+  tryConnect(): ResultState {}
 }
 ```
