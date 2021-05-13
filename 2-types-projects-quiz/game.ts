@@ -21,6 +21,7 @@ function move(direction: Direction) {
       position.x = position.x + 1;
       break;
     default:
+      const invalid: never = direction;
       throw new Error("Unknown command");
   }
 }

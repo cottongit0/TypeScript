@@ -36,4 +36,5 @@
       console.log(`실패. ${state.reason}`);
     }
   }
+  printLoginState();
 }
