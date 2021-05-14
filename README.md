@@ -2719,3 +2719,339 @@ class NetworkClient {
   tryConnect(): ResultState {}
 }
 ```
+
+---
+
+# Advanced Types
+
+모든 프로그래밍 언어에는 타입이 있지만, 이 중에서 타입스크립트는 정말 유연하고 강력한 타입을 가지고 있다. Coditional Types라는 조건부 타입이 있으며 Mapped Types라는 다른 언어에서 찾아보기 힘든 구조적인 타입이 있다. 이 외에도 다양한 Utility Types가 있다. 타입스크립트의 다양한 타입들을 사용해보자.
+
+---
+
+## Type Alias ve Interface - 기술 측면
+
+type과 interface는 성격과 특징이 다르다. 많은 곳에서 type과 interface를 교체해서 사용할 수 있지만, interface를 남용하는 것보다는 정확하게 type과 interface가 어떻게 다른지 알고 사용하는 것이 좋다. 먼저 type과 interface가 `기술 측면`에서 어떤 공통점과 차이점이 있는지 알아보자.
+
+서로 동일한 것을 묘사하는 type과 interface가 있다. 다양한 예시를 통해 확인해보자.
+
+```ts
+type PositionType = {
+  x: number;
+  y: number;
+};
+
+interface PositionInterface {
+  x: number;
+  y: number;
+}
+```
+
+타입과 인터페이스 모두 동일하게 `오브젝트 형태`로 만들 수 있다.
+
+```ts
+const obj1: PositionType = {
+  x: 1,
+  y: 1,
+};
+const obj2: PositionInterface = {
+  x: 1,
+  y: 1,
+};
+```
+
+타입과 인터페이스 모두 동일하게 `클래스`로 구현 가능하다.
+
+```ts
+class pos1 implements PositionType {
+  x: number;
+  y: number;
+}
+class pos2 implements PositionInterface {
+  x: number;
+  y: number;
+}
+```
+
+`extends(확장)`도 가능하다. interface는 기존의 Position을 이용해서 기존의 인터페이스를 확장시킬 수 있다. 타입도 마찬가지로 가능하다. 인터섹션을 이용해서 추가된 아이를 함께 묶을 수 있다. 타입스크립트 초창기에는 타입을 이용한 확장은 불가능했다. 타입을 이용해서 할 수 없는 것들이 많았지만 지금은 많은 기능을 할 수 있게되었다.
+
+```ts
+interface ZPositionInterface extends PositionInterface {
+  z: number;
+}
+
+type ZPositionType = PositionType & { z: number };
+```
+
+`merge`는 오직 인터페이스만 가능하다. 중복된 인터페이스를 호출하여 새로운 값을 추가할 수 있다.
+
+```ts
+interface PositionInterface {
+  x: number;
+  y: number;
+}
+
+interface PositionInterface {
+  z: number;
+}
+
+class pos2 implements PositionInterface {
+  x: number;
+  y: number;
+  z: number;
+}
+
+const obj2: PositionInterface = {
+  x: 1,
+  y: 1,
+  z: 1,
+};
+```
+
+타입만 가능한 것도 있다. NumberType과 같은 새로운 타입을 만든다거나 Union 타입을 만들 수 있다. 그리고 유틸리티나 맵타입 혹인 인덱스 타입도 이용 가능하다. 즉, `computed properties`를 다룰 수 있다.
+
+```ts
+type Person = {
+  name: string;
+  age: string;
+};
+type Name = Person["name"];
+
+type NumberType = number;
+type Direction = "left" | "right";
+```
+
+---
+
+## Type Alias ve Interface - 개념 측면
+
+타입과 인터페이스의 정의부터 다시 한 번 짚어보자.
+
+`interface`는 어떤 것의 `규격 사항`이다. 다른 사람들과 의사소통할 때 오브젝트와 오브젝트 간의 의사소통을 할 때, 이 정해진 interface를 토대로 해서 서로 간의 `상호작용`을 할 수 있도록 도와주는 것이다. 그래서 API는 서로간의 약속을 할 수 있는 계약서와 동일하다. CoffeeMaker라는 인터페이스가 있다. 그리고 그 안에는 makeCoffee라는 함수가 있다. 구현하는 사람들이 interface를 구현함으로써 동일한 규격 사항을 따라간다. 최신 타입스크립트 버전에서는 type도 동일하게 구현할 수 있지만 interface를 활용하는 것이 좋다. `어떤 특정한 규격을 정의`하는 것이라면 이 규격을 통해서 어떤 것이 구현된다면 interface를 쓰는 것이 정확하다. 누군가 구현을 해야 한다면 정의해서 사용하는 것이 좋다. 다른 프로그래밍 언어에서도 interface는 이러한 용도로 이용된다.
+
+```ts
+interface CoffeeMaker {
+  coffeeBeans: number;
+  makeCoffee: (shots: number) => Coffee;
+}
+
+class CoffeeMaker implements CoffeeMaker {
+  coffeeBeans: number;
+  maekCoffee(shots: number) {
+    return {};
+  }
+}
+```
+
+반대로 type은 어떠한 데이터를 담을 수 있을지 데이터의 타입을 결정하는 것이다. 어떠한 것을 구현할 목적으로 만드는 것이 아니라 `데이터를 담을 목적`을 만들 때 사용한다. 만약 type 구현할 것을 interface를 사용한다면 어떤 클래스가 있을 거라고 착각할 수 있다.
+
+```ts
+type Position = {
+  x: number;
+  y: number;
+};
+const pos: Position = { x: 0, y: 0 };
+printPosition(pos);
+```
+
+초창기에는 Type Alias가 할 수 있는 것이 많이 없었다. 그래서 많은 사람들이 interface를 사용했었다. 지금은 점점 Type Alias가 강력해지자 type과 interface를 구분지어 사용하는 것이 중요해졌다. interface는 규격사항이다. 그리고 많은 프로그래밍 언어에서도 이런 식으로 interface를 활용한다.
+
+---
+
+# Utilty Type
+
+타입스크립트에서는 일반적인 프로그래밍 언어에서는 찾을 수 없는 타입을 변환하는 것이 가능하다. 예를 들어 별모양 타입을 일부분을 타입으로 변환하는 것도 가능하다. 다른 종류의 타입으로 `transfrom(변환)`하는 것이 가능하기 때문이다. 이를 잘 사용하면 굉장히 유용하다.
+
+<img src="./images/utility1.png">
+
+---
+
+## index type
+
+index type을 이해하기 위해서는 기본적인 이해가 필요하다. obj에 name이라는 key가 있다. 이때 key값에 접근하기 위해 어떤 방법을 사용할 수 있을까? 총 두 가지 방법이 있다. obj의 key값으로 접근하는 방법이 있고, index에 접근하는 방법이 있다. 이것처럼 타입도 index 기반으로 해서 타입을 결정할 수 있다.
+
+```ts
+const obj = {
+  name: "cotton",
+};
+
+obj.name;
+obj["name"];
+```
+
+Animal이라는 타입이 있다. 이름과 나이, 성별을 담을 수 있다. 그리고 타입 Name에 Animal에 있는 키 값을 그대로 사용할 것이다. 이러면 Name은 string 타입이 된다. 동물에 있는 name(string)이라는 `키의 타입`을 Name 타입에 선언한 것이다.그래서 Name 타입에는 오직 문자열만 할당할 수 있게 된다.
+
+이를 활용하면 다른 방식으로도 사용할 수 있다. Gender라는 타입이 있다. 동일하게 Animal 안에 있는 gender 키 값의 타입을 할당할 것이다. Keys는 `keyof`를 이용해 Animal에 있는 모든 키의 타입을 할당받는다. 그래서 name, age, gender라는 문자열 union 타입으로 할당된다. 데이터를 할당할 때, 다른 문자열은 사용할 수 없고 오직 3가지만 사용할 수 있다.
+
+```ts
+  type Animal = {
+    name:string;
+    age:number;
+    gender:"male" | "female";
+  }
+
+  type Name = Animal["name"] // string
+  const text:Name = "only string!"
+
+  type Keys = keyof Animal; // "name" | "age" | "gender"
+  const key: Keys = "gender";
+}
+```
+
+Person이라는 타입이 있다. 이름과 성별을 받는다. 근데 성별은 Animal에 있는 gender를 그대로 할당하여 사용한다. person은 Person 타입을 갖는다. 그래서 name과 gender를 꼭 적어야 한다. gender 작성 시, 힌트로 Animal에 있던 male과 female이 나오는 걸 확인할 수 있다.
+
+```ts
+type Person = {
+  name: string;
+  gender: Animal["gender"];
+};
+const person: Person = {
+  name: "cotton",
+  gender: "female",
+};
+```
+
+Index Type을 이용하면 다른 타입에 있는 키에 접근해서 그 키의 value의 타입을 그대로 다시 선언할 수 있다.
+
+---
+
+## Mapped Type
+
+기존에 있는 타입들을 이용하면서 조금 다른 형태로 변환할 수 있는 것을 의미한다. Mapped Type은 왜 이용하는지 알아보자.
+
+Video라는 타입이 있다. Video에는 title과 author에 대한 정보가 있다. 만약 Video지만 title과 author를 옵셔널로 받는 타입을 만들고 싶다면 어떻게 해야할까? 새로운 Video 타입을 만들어 옵셔널을 줄 수 있을 것이다. 또 읽기만 가능한 타입을 새로 만들고 싶다. 그러면 readonly를 사용하는 새로운 타입을 만들 수 있을 것이다.
+
+하지만 Video에서 변경사항이 일어나면 VideoOptional과 VideoReadOnly를 똑같이 다시 변경해주어야 한다. 일일히 수정하는 것은 너무 번거롭다. 이를 간편하게 하고 재사용성을 높이기 위해 `Mapped Type`을 사용한다.
+
+```ts
+type Video = {
+  title: string;
+  author: string;
+};
+type VideoOptional = {
+  title?: string;
+  author?: string;
+};
+type VideoReadOnly = {
+  readonly title: string;
+  readonly author: string;
+};
+```
+
+배열에서 숫자 배열이 있다면 map이라는 API를 활용하여 각각의 아이템을 다른 것으로 변환하는 것이 가능했다. 아이템 두개를 곱하면 각각 1과 4가 출력된다. 그리고 나온 값을 배열 형태로 다시 만들어준다. 이것과 마찬가지로 Mapped Type을 활용하면 `기존의 타입을 다양한 형태로 변환`할 수 있다.
+
+```ts
+[1, 2].map((item) => itme * item);
+```
+
+`[]`를 이용하면 키를 하나씩 돌 수 있다. 이는 `for ...in`을 썼을 때와 동일하다. for ...in는 오브젝트에 있는 모든 키들을 하나하니씩 도는 연산자이다. 타입 오브젝트 정의 안에서 인덱스 기호를 사용하면 for ...in처럼 키를 돌 수 있다.
+
+P라는 것은 T 타입의 모든 키들 중 하나이다. 그래서 T가 가지고 있는 키들 중에 들어있는 하나의 P라는 키는 T 오브젝트 안에 있는 키를 이용해서 value를 정의할 수 있다. 그래서 이 Optional은 기존에 있는 T 오브젝트 타입의 모든 키들을 돌면서 T 타입의 키 값의 타입을 다시 정의한다.
+
+```ts
+type Optional<T> = {
+  [P in keyof T]: T[P]; //for ...in
+};
+```
+
+T 타입과 똑같지만 Optional 기호를 주게 되면 우리가 앞서 만들었던 VideoOptional을 간단하게 만들 수 있다. VideoOptional이라는 타입을 만들어보자. 우리가 정의한 Optional을 이용하여 만든다. Video에 Optional 타입을 만드는 것이다. 그러면 이 Optional에 전달된 Video는 Video를 계속 돈다. 먼저 title을 optional로 만들고 value의 타입을 string으로 지정한다. 그리고 author도 똑같이 반복해준다. 이를 이용하면 VideoOptional이라는 오브젝트 타입을 따르는 객체들을 쉽게 만들 수 있다. 단 optional로 설정했기에 있을 수 있고 없을 수 있지만 Video 타입에 없던 다른 종류의 타입을 넣게 되면 에러가 발생한다. 이처럼 Mapped Type을 이용하면 재사용성이 높아진다.
+
+```ts
+type Optional<T> = {
+  [P in keyof T]?: T[P]; //for ...in
+};
+
+type VideoOptional = Optional<Video>;
+const videoOp: VideoOptional = {
+  title: "hi",
+};
+```
+
+한 번 정의해둔 Optional은 이곳저곳에서 사용할 수 있다. 새로운 Animal이라는 타입을 만들어보자. name과 age를 받는다. 우리가 Video를 활용했던 것처럼 똑같이 활용할 수 있다.
+
+이렇게 타입 오브젝트 정의 안에서 배열과 같은 기호를 사용하면 key를 빙글빙글 반복하게 된다. 그래서 T 타입에 있는 모든 키들이 순차적으로 P에 할당된다. P키는 Optional이고 P값의 타입을 맵핑해서 만들 수 있다.
+
+```ts
+type Animal = {
+  name: string;
+  age: number;
+};
+const animal: Optional<Animal> = {
+  name: "dog",
+};
+```
+
+이걸 이용해서 VideoReadOnly도 구현해보자. videoRo에 있는 값을 바꾸려고 하면 에러가 발생할 것이다. 이처럼 Mapped Type을 이용하면 기존의 타입에서 다른 타입으로 성질변화를 할 수 있다.
+
+```ts
+type ReadOnly<T> = {
+  readonly [P in keyof T]: T[P];
+};
+
+type VideoReadOnly = Readonly<Video>;
+const videoRo: VideoReadOnly = {
+  title: "mapping",
+  author: "cotton",
+};
+
+const video: ReadOnly<Video> = {
+  title: "mapping",
+  author: "cotton",
+};
+```
+
+Mapped type에는 union도 활용할 수 있다. Nullable 타입은 이제 null값도 받을 수 있다. 그래서 오브젝트를 생성하면 string 타입만 넣는 것이 아니라 null도 지정할 수 있다.
+
+```ts
+type Nullabe<T> = { [P in keyof T]: T[P] | null };
+const obj2: Nullabe<Video> = {
+  title: "Hi",
+  author: null,
+};
+```
+
+Proxify라는 타입은 전달된 오브젝트를 돌면서 타입을 Proxy라는 타입으로 한 단계 감싸준다.
+
+```ts
+type Proxy<T> = {
+  get(): T;
+  set(value: T): void;
+};
+type Proxify<T> = {
+  [P in keyof T]: Proxy<T[P]>;
+};
+```
+
+---
+
+## Condition Type
+
+자바스크립트를 사용하면서 삼항연산자를 이용해보았을 것이다. Condition Type은 삼항연산자와 매우 유사하다. Check라는 타입이 있다. 기존에 주어진 타입이 string을 상속한다면 boolean 타입이 되고 아니라면 number 타입이 된다. Type은 Check 타입을 이용해서 string을 전달한다. T로 받아온 타입은 string이기 때문에 Type은 boolean 타입이 된다. 이처럼 조건이 맞으면 어떤 타입을 선택하도록 만들 수도 있다.
+
+```ts
+type Check<T> = T extends string ? boolean : number;
+type Type = Check<string>; // boolean
+```
+
+Codition Type은 여러개로 묶어서 사용할 수도 있다. 전달된 타입이 string을 상속하면 string을 number를 상속하면 number를 사용하는 여러개로 중첩된 ternary operator다. Condition type은 이처럼 `타입을 조건적으로 결정할 수 있는 타입`이다.
+
+```ts
+type TypeName<T> = T extends string
+  ? "string"
+  : T extends number
+  ? "number"
+  : T extends boolean
+  ? "boolean"
+  : T extends undefined
+  ? "undefined"
+  : T extends Function
+  ? "function"
+  : "object";
+
+type T0 = TypeName<string>;
+type T1 = TypeName<"a">;
+type T2 = TypeName<() => void>;
+```
+
+---
+
+## Reaonly

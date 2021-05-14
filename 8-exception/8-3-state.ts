@@ -16,7 +16,7 @@
   class UserService {
     constructor(private client: NetworkClient) {}
     login() {
-      this.client.tryConnect();
+      // this.client.tryConnect();
       //login...
     }
   }
