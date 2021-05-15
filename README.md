@@ -3280,7 +3280,7 @@ console.log(array);
 
 CoffeeMachine이라는 생성자 함수를 이용해서 만들어보았다. 기본적으로 오브젝트를 상속하고 있음을 확인할 수 있다. 그리고 beans라는 공통된 프로퍼티가 들어있다.
 
-> CoffeeMachine {beans: 10}<br/>beans: 10<br/>\_\_proto**:<br/>constructor: ƒ CoffeeMachine(beans)<br/>\_\_proto**: Object
+> CoffeeMachine {beans: 10}<br/>>beans: 10<br/>>>\_\_proto\_\_:<br/>constructor: ƒ CoffeeMachine(beans)<br/>\_\_proto\_\_: Object
 
 ```ts
 function CoffeeMachine(beans) {
@@ -3298,7 +3298,7 @@ console.log(machine2);
 
 이제 makeCoffee라는 함수도 만들어보자. 샷을 인자로 받아 커피를 만들어주는 함수이다. 다시 확인해보면 오브젝트 안에 beans와 makeCoffee 함수가 들어있다. 이런 식으로 생성자 함수 안에 만들게 되면 만들어지는 오브젝트마다 공통된 함수를 갖게 된다. 만들어지는 오브젝트마다 포함되는 것을 instacne member level이라고 부른다.
 
-> CoffeeMachine {beans: 10, makeCoffee: ƒ}<br/>beans: 10<br/>makeCoffee: (shots) => { console.log("커피를 만드는 중입니다.."); }<br/>\_\_proto\_\_: Object
+> CoffeeMachine {beans: 10, makeCoffee: ƒ}<br/>>beans: 10<br/>>>makeCoffee: (shots) => { console.log("커피를 만드는 중입니다.."); }<br/>>>\_\_proto\_\_: Object
 
 ```ts
 function CoffeeMachine(beans) {
@@ -3309,11 +3309,11 @@ function CoffeeMachine(beans) {
 }
 ```
 
-하지만 이 makeCoffee를 한 번만 정의하고 싶다면, CoffeeMachine의 prototype에 접근할 수 있다. 그 안에 makeCoffee를 선언한다. 그리고 동일하게 다시 로그를 출력한다. 오브젝트 안에는 더이상 makeCoffee는 없고 **proto**를 열어보면 makeCoffee가 공통적으로 들어있는 것을 확인할 수 있다.
+하지만 이 makeCoffee를 한 번만 정의하고 싶다면, CoffeeMachine의 prototype에 접근할 수 있다. 그 안에 makeCoffee를 선언한다. 그리고 동일하게 다시 로그를 출력한다. 오브젝트 안에는 더이상 makeCoffee는 없고 \_\_proto\_\_를 열어보면 makeCoffee가 공통적으로 들어있는 것을 확인할 수 있다.
 
 CoffeeMachine은 proto를 가지고 있고 proto는 오브젝트이다. makeCoffee를 가지고 있으며 이 proto는 오브젝트를 상속한다. 즉, 만든 machine1, 2는 CoffeeMachine이라는 프로토를 가지고 상속하고 있다. 결국 CoffeeMachine이라는 것은 오브젝트 proto를 상속하고 있다.
 
-> CoffeeMachine {beans: 10}<br/>beans: 10<br/>\_\_proto**:<br/>makeCoffee: (shots) => { console.log("커피를 만드는 중입니다.."); }<br/>constructor: ƒ CoffeeMachine(beans)<br/>\_\_proto**: Object
+> CoffeeMachine {beans: 10}<br/>>beans: 10<br/>>\_\_proto\_\_:<br/>>>makeCoffee: (shots) => { console.log("커피를 만드는 중입니다.."); }<br/>>>constructor: ƒ CoffeeMachine(beans)<br/>>>\_\_proto\_\_: Object
 
 ```ts
 function CoffeeMachine(beans) {
@@ -3337,7 +3337,7 @@ console.log(latteMachine);
 
 이제 이 LatteMachine을 makeCoffee에 상속해보자. 상속하려면 LatteMachine의 prototype에 object.create를 사용하여 CoffeeMachine에 있는 prototype을 연결하면 된다. 그리고 다시 출력해보자. LatteMachine은 CoffeeMachine을 상속한다. 열어보면 CoffeeMachine은 오브젝트를 상속하는 것을 확인할 수 있다. 이제 LatteMachine에서도 makeCoffee라는 함수를 이용할 수 있다.
 
-> LatteMachine {milk: true}<br/>milk: true<br/>\_\_proto**: CoffeeMachine<br/>\_\_proto**: Object
+> LatteMachine {milk: true}<br/>>milk: true<br/>>>\_\_proto\_\_: CoffeeMachine<br/>>>>\_\_proto\_\_: Object
 
 ```ts
 LatteMachine.prototype = Object.create(CoffeeMachine.prototype);
