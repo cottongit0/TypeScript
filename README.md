@@ -3054,4 +3054,184 @@ type T2 = TypeName<() => void>;
 
 ---
 
-## Reaonly
+## Utility Type - Reaonly
+
+앞서 만든 Optional, ReadOnly와 같은 타입들은 이미 타입스크립트에서 `utility type`이라해서 만들어져있다. 일일이 만들 필요없이 개발자가 공통적으로 필요한 타입들이 미리 정의되어 있다. 이를 잘 사용하기만 하면된다.
+
+```ts
+type Partial<T> = {
+  [P in keyof T]?: T[P];
+};
+
+type Readonly<T> = {
+  readonly [P in keyof T]: T[P];
+};
+// ...
+```
+
+ToDo라는 타입이 있다. 이를 `읽기전용`으로 만들어 불변성을 보장하고 싶다. 그리고 display라는 함수를 이용해서 매개변수를 호출하고 싶다. 우리는 타입스크립트가 이미 만들어준 utility type인 `Readonly`를 꺼내 사용하기만 하면 된다. 이제 display 함수 안에서 ToDo의 값을 변경하려고 하면 Error가 발생하는 것을 확인할 수 있다.
+
+```ts
+type ToDo = {
+  title: string;
+  description: string;
+};
+function display(todo: Readonly<ToDo>) {
+  todo.title = ""; // ERROR! 읽기 전용 속성이므로 'title'에 할당할 수 없습니다.
+}
+```
+
+---
+
+## Utility Type - Partial
+
+이제 Readonly 뿐만 아니라 다양한 utility type들을 알아가보자. Partial은 이미 구현해봤다. 우리가 구현한 Optional이 바로 Partial이다. Partial은 기존의 타입 중에서 `부분적인 것만 허용하고 싶을 때` 이용할 수 있다. ToDo에 좀 더 다양한 프로퍼티를 추가해보자.
+
+```ts
+type ToDo = {
+  title: string;
+  description: string;
+  label: string;
+  priority: "high" | "low";
+};
+```
+
+이제 ToDo의 내용을 업데이트할 수 있는 함수를 만들 것이다. updateTodo는 ToDo의 타입을 받아와 다른 내용으로 업데이트할 수 있다. 이때 `Partial`을 굉장히 유용하게 사용할 수 있다. fieldsToUpdate는 업데이트 하려는 내용을 받아와 변경시켜준다. 이제 엉뚱한 key와 value는 전달할 수 없고 ToDo 타입에 있는 것들 중에 부분적인 아이들만 받아올 수 있다. 새로 업데이트 되면 새로운 ToDo를 반환한다. 기존에 있는 todo 아이템을 스프레드 연산자를 이용해서 하나씩 복사한 후, 전달된 fieldsToUpdate를 덮어씌워주면 된다.
+
+```ts
+function updateTodo(todo: ToDo, fieldsToUpdate: Partial<ToDo>): ToDo {
+  return { ...todo, ...fieldsToUpdate };
+}
+```
+
+이제 이 함수를 사용해보자. 새로 todo라는 데이터를 생성해보자. todo는 ToDo 타입을 받는다. ToDo형식에 맞춰 작성해준다. 그리고 우리가 만든 updateTodo를 이용하여 다른 내용으로 업데이트 해줄 것이다.
+
+```ts
+const todo: ToDo = {
+  title: "Programming Laguage",
+  description: "Learn TypeScript",
+  label: "Study",
+  priority: "high",
+};
+```
+
+updateTodo를 이용하여 priority의 값을 변경했다. 그리고 콘솔에 출력해보면 우리가 변경한 값 그대로 출력된 것을 확인할 수 있다. ToDo의 기존 데이터를 유지하면서 priority만 변경되었다.
+
+```ts
+const updated = updateTodo(todo, { priority: "low" });
+console.log(updated);
+```
+
+---
+
+## Utility Type - Pick
+
+`Pick`은 기존의 타입에서 `원하는 속성과 값`들만 뽑아서 만들 수 있다. 예를 들어 Video라는 타입이 있다. Video에는 id, title, url과 같은 메타데이터 정보 뿐만 아니라 실제로 Video에 데이터가 들어있는 타입이다. getVideo라는 함수는 Video를 반환한다. Video의 정보뿐만 아니라 Video의 byte-data도 전부 리턴한다. 굉장히 무거운 API다.
+
+```ts
+type Video = {
+  id: string;
+  title: string;
+  url: string;
+  data: string;
+};
+function getVideo(id: string): Video {
+  return {
+    id,
+    title: "video",
+    url: "https://..",
+    data: "byte-data..",
+  };
+}
+```
+
+반대로 getVideoMetadata는 Video에 관련된 간략한 데이터만 반환하는 타입이다.
+
+```ts
+function getVideoMetadata(id: string): Pick<Video, "id" | "title"> {
+  return {
+    id: id,
+    title: "title",
+  };
+}
+```
+
+하지만 랜덤한 곳에서 바로 사용하기보다는 타입을 선언해서 계속 `재사용`할 수 있도록 만드는 것이 좋다. Pick이라는 타입은 기존에 있는 타입에서 원하는 것만 골라서 조금 더 제한적인 타입을 만들고 싶을 때 사용할 수 있다.
+
+```ts
+type VideoMetadata = Pick<Video, "id" | "title">;
+function getVideoMetadata(id: string): VideoMetadata {
+  return {
+    id: id,
+    title: "title",
+  };
+}
+```
+
+Pick이라는 것은 어떤 타입을 받아온다. K는 T타입에 있는 key들을 상속한 아이들이다. 그래서 항상 Pick을 이용할 때 기존의 Video에 있는 key들 중 하나를 써야한다. 만약 다른 걸 사용한다면 에러가 발생한다. 그래서 선언된 곳에 가보면 K라는 것은 T 타입에 있는 key들 중에 하나를 써야 함을 알 수 있다. 그리고 전달된 key들에 한에서만 돌면서 타입을 결정함을 확인할 수 있다.
+
+```ts
+// From T, pick a set of properties whose keys are in the union K
+
+type Pick<T, K extends keyof T> = {
+  [P in K]: T[P];
+};
+```
+
+---
+
+## Utility Type - Omit
+
+`Omit`은 Pick과 반대로 원하는 것을 빼버릴 수 있다.
+
+```ts
+type VideoMetadata = Omit<Video, "url" | "data">;
+
+function getVideoMetadata(id: string): VideoMetadata {
+  return {
+    id: id,
+    title: "title",
+  };
+}
+```
+
+타입스크립트에서 정의한 Omit에 대해 알아보자. 전달된 T타입과 어떤 종류의 key를 상속하는 K가 있다. 즉, Omit에 전달되는 key가 Video에 없는 것도 가능하다. key의 유무와는 상관없이 다른 어떤 종류의 key도 전달이 가능하다. Omit은 Pick을 이용하는데, T 타입을 그대로 유지하면서 T에 있는 key들 중 K를 제외한 아이들을 Pick한다.
+
+```ts
+//Construct a type with the properties of T except for those in type K.
+
+type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
+
+type VideoMetadata = Omit<Video, "url" | "data" | "empty">;
+```
+
+Exclude를 보면 U가 T 안에 들어있다면, 그 타입은 사용하지 않고 T가 U 안에 없을 때만 T를 이용한다. 그래서 Exclude에 전달된 T에 U가 제외된 아이들을 반환하게 된다.
+
+```ts
+// Exclude from T those types that are assignable to U
+
+type Exclude<T, U> = T extends U ? never : T;
+```
+
+---
+
+## Utility Type - Record
+
+Pageinfo와 page라는 타입이 있다. 이 둘을 서로 엮을 수 있는 것이 바로 Record type이다.
+
+```ts
+type PageInfo = {
+  title: string;
+};
+type Page = "home" | "about" | "contact";
+```
+
+자료구조 map을 알고 있다면 Record가 매우 익숙할 것이다. Page를 key로 삼고 PageInfo를 value로 삼으면 된다. Record는 map과 비슷하게 하나와 어떤 하나를 연결하고 싶을 때 혹은 하나를 key로 쓰고 나머지를 다른 타입으로 묻고 싶을 때 유용하게 사용할 수 있다.
+
+```ts
+const nav: Record<Page, PageInfo> = {
+  home: { title: "Home" },
+  about: { title: "About" },
+  contact: { title: "Contact" },
+};
+```
