@@ -3235,3 +3235,121 @@ const nav: Record<Page, PageInfo> = {
   contact: { title: "Contact" },
 };
 ```
+
+---
+
+# JavaScript
+
+타입스크립트는 자바스크립트를 기반으로 하는 언어이다. 자바스크립트가 어렵다면 타입스크립트도 어려워진다. 조금 어려울 수 있고 헷걸리는 내용들을 다시 확인해보자.
+
+---
+
+## JavaScript - Prototype
+
+자바스크립트도 엄밀히 따지면 객체지향 프로그래밍 언어이다. Prototype을 기반으로 하여 객체지향 프로그래밍을 할 수 있다. ES6부터는 Class를 사용할 수 있게 되었는데, 이 Class가 프로토를 기반으로 한다. 우리가 타입스크립트에서 작성하는 수많은 class와 interface들 모두 컴파일러로 변환하면 `Prototype`으로 변환된다. 그래서 이 자바스크립트에서 Prototype은 근본이라고 볼 수 있다. Prototype은 `상속`을 위해 사용된다. Class를 이용해서 Class를 선언하고 그 Class를 extends해서 상속을 구현할 수 있는 것처럼, 자바스크립트에서는 Prototype을 이용하여 상속을 구현할 수 있다. Prototype은 Class에서 속성과 함수들을 정의한 것과 마찬가지로 `반복적`으로 사용할 수 있도록 속성과 함수를 정의하는 것이다. 즉, Prototype은 `inheritance(상속)`을 위해서 사용되는 언어이다. Prototype을 기반으로 하는 프로그래밍 언어는 객체지향 프로그래밍을 할 수 있는 한 가지의 방식으로 행동과 기존에 있는 오브젝트를 `재사용`할 수 있다.
+
+x와 y라는 오브젝트를 만들어보자. 그리고 콘솔에 x와 y를 각각 출력한다. 아무것도 들어있지 않는 오브젝트이지만 오브젝트를 열어보면 `__proto__: Object`가 들어있는 걸 확인할 수 있다. 프로토는 오브젝트로 자바스크립트에 있는 모든 오브젝트는 프로토를 상속한다.
+
+```ts
+const x = {};
+const y = {};
+console.log(x);
+console.log(y);
+```
+
+그래서 x, y에 별다른 데이터를 작성하지 않았음에도 불구하고 proto 내부에 들어있는 함수를 사용할 수 있다.
+
+```ts
+console.log(x.toString());
+```
+
+x의 proto와 y의 proto는 동일하다. 바로 x와 y는 동일한 오브젝트의 proto를 상속하고 있기 때문이다.
+
+```ts
+console.log(x.__proto__ === y.__proto__);
+```
+
+이번엔 배열을 확인해보자. 빈 배열의 array가 있다. 콘솔에 출력해보면 동일하게 `__proto__: Array(0)`가 내부에 있음을 확인할 수 있다. 그래서 proto에 있는 모든 함수들을 이용할 수 있다. 쭉 내려보면 Array라는 proto는 `__proto__: Object`를 상속한다. 즉, 자바스크립트에 있는 모든 오브젝트는 proto라는 오브젝트를 가지고 있다. 어떠한 종류의 오브젝트인지 상관없이 무조건 toString을 이용할 수 있는 것도 상속하고 있기 때문이다.
+
+```ts
+const array = [];
+console.log(array);
+```
+
+타입스크립트의 기능을 이용하여 만들었던 커피머신을 자바스크립트의 proto를 이용하여 간단하게 만들어보자. constructor의 기능을 하는 CoffeeMachine을 만든다. beans를 받아오며 this.beans는 전달받은 beans로 설정된다. 그리고 새로운 오브젝트를 생성한다. 각각의 머신별로 beans의 개수를 다르게 넣어보았다.
+
+CoffeeMachine이라는 생성자 함수를 이용해서 만들어보았다. 기본적으로 오브젝트를 상속하고 있음을 확인할 수 있다. 그리고 beans라는 공통된 프로퍼티가 들어있다.
+
+> CoffeeMachine {beans: 10}<br/>beans: 10<br/>\_\_proto**:<br/>constructor: ƒ CoffeeMachine(beans)<br/>\_\_proto**: Object
+
+```ts
+function CoffeeMachine(beans) {
+  this.beans = beans;
+}
+
+const machine1 = new CoffeeMachine(10);
+const machine2 = new CoffeeMachine(20);
+
+console.log(machine1);
+console.log(machine2);
+```
+
+---
+
+이제 makeCoffee라는 함수도 만들어보자. 샷을 인자로 받아 커피를 만들어주는 함수이다. 다시 확인해보면 오브젝트 안에 beans와 makeCoffee 함수가 들어있다. 이런 식으로 생성자 함수 안에 만들게 되면 만들어지는 오브젝트마다 공통된 함수를 갖게 된다. 만들어지는 오브젝트마다 포함되는 것을 instacne member level이라고 부른다.
+
+> CoffeeMachine {beans: 10, makeCoffee: ƒ}<br/>beans: 10<br/>makeCoffee: (shots) => { console.log("커피를 만드는 중입니다.."); }<br/>\_\_proto\_\_: Object
+
+```ts
+function CoffeeMachine(beans) {
+  this.beans = beans;
+  this.makeCoffee = (shots) => {
+    console.log("커피를 만드는 중입니다..");
+  };
+}
+```
+
+하지만 이 makeCoffee를 한 번만 정의하고 싶다면, CoffeeMachine의 prototype에 접근할 수 있다. 그 안에 makeCoffee를 선언한다. 그리고 동일하게 다시 로그를 출력한다. 오브젝트 안에는 더이상 makeCoffee는 없고 **proto**를 열어보면 makeCoffee가 공통적으로 들어있는 것을 확인할 수 있다.
+
+CoffeeMachine은 proto를 가지고 있고 proto는 오브젝트이다. makeCoffee를 가지고 있으며 이 proto는 오브젝트를 상속한다. 즉, 만든 machine1, 2는 CoffeeMachine이라는 프로토를 가지고 상속하고 있다. 결국 CoffeeMachine이라는 것은 오브젝트 proto를 상속하고 있다.
+
+> CoffeeMachine {beans: 10}<br/>beans: 10<br/>\_\_proto**:<br/>makeCoffee: (shots) => { console.log("커피를 만드는 중입니다.."); }<br/>constructor: ƒ CoffeeMachine(beans)<br/>\_\_proto**: Object
+
+```ts
+function CoffeeMachine(beans) {
+  this.beans = beans;
+}
+
+CoffeeMachine.prototype.makeCoffee = (shots) => {
+  console.log("커피를 만드는 중입니다..");
+};
+```
+
+이번에는 라떼머신을 만들어보자. LatteeMachine은 milk를 인자로 받는다. 타입스크립트와는 달리 타입이 정의되어 있지 않아서 타입에 상관없이 인자를 받아올 수 있다. 새로운 latteMachine을 만들어 출력해보면 결국 이 LatteMachine도 오브젝트 proto를 상속하고 있음을 알 수 있다.
+
+```ts
+function LatteMachine(milk) {
+  this.milk = milk;
+}
+const latteMachine = new LatteMachine(true);
+console.log(latteMachine);
+```
+
+이제 이 LatteMachine을 makeCoffee에 상속해보자. 상속하려면 LatteMachine의 prototype에 object.create를 사용하여 CoffeeMachine에 있는 prototype을 연결하면 된다. 그리고 다시 출력해보자. LatteMachine은 CoffeeMachine을 상속한다. 열어보면 CoffeeMachine은 오브젝트를 상속하는 것을 확인할 수 있다. 이제 LatteMachine에서도 makeCoffee라는 함수를 이용할 수 있다.
+
+> LatteMachine {milk: true}<br/>milk: true<br/>\_\_proto**: CoffeeMachine<br/>\_\_proto**: Object
+
+```ts
+LatteMachine.prototype = Object.create(CoffeeMachine.prototype);
+latteMachine.makeCoffee(10);
+```
+
+이처럼 자바스크립트에서도 타입스크립트처럼 interface나 generic은 없지만 prototype을 이용하여 상속을 구현할 수 있다. 자바스크립트의 prototype은 상속을 하기 위한 것으로 코드를 재사용하기 위해 만들어졌다.
+
+---
+
+## JavaScript - this
+
+---
+
+## JavaScript - Module
