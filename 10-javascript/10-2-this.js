@@ -6,15 +6,15 @@ console.log(this);
 
 class Counter {
   count = 0;
-  increas = function () {
+  increas = () => {
     console.log(this);
   };
 }
 const counter = new Counter();
 counter.increas();
 
-// const caller = counter.increas;
-const caller = counter.increas.bind(counter);
+const caller = counter.increas;
+// const caller = counter.increas.bind(counter);
 caller();
 
 class Bob {}
