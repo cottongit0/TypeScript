@@ -3350,6 +3350,74 @@ latteMachine.makeCoffee(10);
 
 ## JavaScript - this
 
+여러 프로그래밍 언어에서 this는 자기 자신이 생성된 오브젝트 자신을 가리킨다. 하지만 자바스크립트에서 this는 누가 불렀냐에 따라서 this가 달라질 수 있다. 호출한 문맥에 따라서 this가 동적으로 변경되어 주의할 필요가 있다. this는 호출한 것의 문맥을 나타낸다. 아무것도 하지 않고 그냥 this를 부르면 브라우저 한경에서의 글로벌 객체는 Window다. 그래서 this를 호출하게 되면 Window가 출력된다.
+
+```ts
+console.log(this);
+```
+
+함수를 만들어보자. simpleFunc은 this를 출력한다. 그리고 simpleFunc을 호출한다. 글로벌에서 함수를 호출한다는 것은 Window에 있는 것을 호출하는 것과 동일하다. 똑같이 Window가 나오는 걸 확인할 수 있다.
+
+> 선언한 함수는 기본적으로 Window 객체에 등록된다.
+
+```ts
+(function simpleFunc() {
+  console.log(this);
+})();
+```
+
+Counter라는 Class가 있다. 멤버변수는 count가 있고 increase라는 함수가 있다. 함수를 선언하여 this를 출력한다. 새로운 카운터 객체를 만들어서 increase를 호출해보면 this는 Counter를 가리키고 있음을 확인할 수 있다. 윈도우에서 호출한 simpleFunc의 this는 Window가 되고 Counter에서 호출한 increase의 this는 Counter가 된다.
+
+```ts
+class Counter {
+  count = 0;
+  increas = function () {
+    console.log(this);
+  };
+}
+const counter = new Counter();
+counter.increas();
+```
+
+이제는 caller라는 변수에 counter에 있는 increase를 할당한다. 함수의 포인터를 caller에다가 할당했다. 함수를 호출하면 undefined가 나온다. 원래 Counter에 있는 increase안 this는 클래스를 가리키고 있었다. 이 Counter의 increase 포인터를 caller라는 변수에 할당하면서 this에 대한 정보를 잃어버린 것이다. let과 const로 선언된 변수는 윈도우에 등록되어지 있지 않으므로 caller를 호출하는 것은 윈도우도 그 어떤 오브젝트도 아니기 때문에 undefined가 호출한 것과 마찬가지다. 그래서 this가 undefined로 나오게 된다.
+
+> 함수와 달리 let, conts라는 키워드를 이용하여 변수를 선언하게 되면 선언된 변수는 Window에 등록되지 않는다. 반면에 var는 기본적으로 Window에 등록되어진다. var 사용은 하지 않는 것이 좋다.
+
+```ts
+const caller = counter.increas;
+caller();
+```
+
+자바스크립트에서 할 수 있는 미친 짓을 해보자 Bob이라는 클래스가 있다. Bob의 새로운 객체를 만들어주고 run이라는 함수에 increase 함수를 할당해준다. 이제 run을 호출해보자. this 값이 Bob으로 출력된다. 왜냐하면 이 run 함수는 Bob이 불렀기 때문이다. 이처럼 자바스크립트는 this라는 정보를 함수 다른 곳으로 할당하는 순간 잃어버릴 수 있다.
+
+```ts
+class Bob {}
+const bob = new Bob();
+bob.run = counter.increas;
+bob.run();
+```
+
+this가 정보를 잃지 않기 위해서는 `bind`를 이용해야 한다. 할당할 때 counter의 increase라는 함수를 바인딩할 것이다. counter 오브젝트와 바인딩할 것이라고 선언하면 호출 시, counter로 나오는 걸 확인할 수 있다. 그래서 자바스크립트의 this는 부르는 곳, 문맥에 따라서 변경될 수 있으므로 오브젝트와 연결하고 싶다면 bind라는 함수를 이용해서 묶어줘야 한다.
+
+```ts
+const caller = counter.increas.bind(counter);
+```
+
+bind를 일일이 사용하지 않아도 되는 다른 방법이 있다. 함수를 선언할 때, function이 아니라 `arrow function`을 이용하면 된다. 다른 프로그래밍 언어에서 클래스 안에 this를 이용하면 자기자신을 가리키는 것처럼 arrow function도 마찬가지로 선언될 당시에 스코프의 this context를 유지한다.
+
+```ts
+class Counter {
+  count = 0;
+  increas = () => {
+    console.log(this);
+  };
+}
+```
+
 ---
 
 ## JavaScript - Module
+
+자바스크립트에서 `모듈`이란 파일 안에 코드를 모듈화해서 작성하는 것을 의미한다. 한 모듈이라고 하는 것은 한 파일안에 작성되어 있는 코드를 말하는 것이다. 따로 모듈화해서 작성하지 않으면 여러가지의 파일들이 있다면 이 모든 코드들은 Global Scope로 측정되게 된다. 파일안에 작성된 모든 함수들은 브라우저 환경이라면 윈도우에, 노드환경이라면 전부 글로벌로 등록되어진다.
+
+이것의 치명적인 문제는 각각의 파일에서 동일한 add 함수를 구현해 두었다면 이름 충돌이 발생할 확률이 높다. 내가 아무리 조심해서 작성한다 하더라도 가져다가 쓰는 라이브러리에서 동일한 이름을 작성하는 경우가 있을 수 있다. 이처럼 규모가 조금이라도 큰 프로젝트라면 `모듈화`를 이용해서 코딩하는 것이 안전한다. 즉, 모듈이라는 것은 코드를 그 파일 내부에서만 한정할 수 있도록 모듈화할 수 있도록 하는 것을 의미한다. 모듈화를 하게 되면 기본적으로 서로 다른 파일에서는 접근하거나 볼 수 없다. 다른 모듈에서 꺼내 사용하고 싶다면 제공하고자 하는 모듈에서 `export`해주어야 한다. 사용하고자 하는 곳에서는 `import`해와야 한다.
