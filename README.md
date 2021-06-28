@@ -5,11 +5,25 @@ https://www.typescriptlang.org/
 
 ## 타입스크립트란?
 
-자바스크립트를 베이스로 하는 superest of JavaScript로써 자바스크립트를 한 단계 감싸는 언어이다. `Statically Typed Lagnage`여서 컴파일 시간 때 타입에 관련된 에러를 잡을 수 있다. 타입스크립트는 `타입이 정적으로 결정`되어 우리가 코딩할 때 타입이 결정이 된다. 그래서 즉각적으로 타입에러를 받을 수 있다.
+자바스크립트를 베이스로 하는 superest of JavaScript로써 자바스크립트를 한 단계 감싸는 언어이다. `Statically Typed Lagnage`여서 컴파일 시간 때 타입에 관련된 에러를 잡을 수 있다. 타입스크립트는 `타입이 정적으로 결정`되어 우리가 코딩할 때 타입이 결정이 된다. 코드가 실행되기 전에 에러를 잡고 픽스할 수 있는 시간을 제공해준다. 그래서 즉각적으로 타입에러를 받을 수 있다.
 
 그리고 `강력한 객체지향 프로그래밍(OOP)`이 가능하다. OOP는 객체 위주로 모듈성있는 코드를 작성할 수 있다. 모듈별로 원하는 것을 재사용할 수 있는 `재사용성`과 객체 단위로 확장해나갈 수 있는 `확장성`도 높다. 이것들을 근본으로 하여 기존 코드에 문제해결이나 새로운 기능을 추가할 때 `유지보수`를 쉽게 할 수 있다.
 
 자바스크립트에서는 보장받을 수 없었던 타입을 보장 받음으로써 조금 더 안정적인 소프트웨어를 만들 수 있다.
+
+---
+
+## 자바스크립트와 타입스크립트의 차이
+
+타입스크립트는 프로그래밍 언어로 Compiled Language다. 하지만 전통적인 Compiled Language와는 차이가 있다. 그래서 `Transpile`이라는 용어를 사용하기도 한다. 자바스크립트는 Interpreted Language로 바로 해석해서 실행시키는 언어이다.
+
+|Compiled|Interpreted|
+|---|---|
+|컴파일 O|컴파일 X|
+|컴파일러 필요 O|컴파일러 필요 X|
+|컴파일하는 시점 O| 컴파일하는 시점 X|
+|컴파일된 결과물을 실행하는 시점| 코드를 실행하는 시점(런타임)|
+|컴파일된 결과물을 실행| |
 
 ---
 
@@ -26,13 +40,17 @@ https://www.typescriptlang.org/
 
 1. 실행 <br/>
    npm i -g ts-node <br/>
+   npm i typescript -g <br/>
    ts-node fileName.ts
 
 1. Watch 모드 <br/>
-   tsc fileName.ts
+   tsc -w
 
 1. Terminal 컴파일 <br/>
    ts-node fileName.ts
+
+1. tsconfig.json 파일 생성
+   tsc --init
 
 ---
 
@@ -54,7 +72,57 @@ operation(연산)을 할 때 함수가 쓰이는데, 코드가 수행된 후에 
 
 따라서 타입스크립트에서는 `최대한 명확하게 타입을 명시함`으로써 타입이 조금 더 보장이 되는 방식으로 프로그래밍하는 것이 굉장히 중요하다.변수, 클래스, 함수에 어떤 타입의 데이터를 전달할 수 있고 받아올 수 있는지를 명확하게 조금 더 세부적으로 작성해야 한다.
 
-## 기본 - 타입을 알아보자
+## 기본 - 자바스크립트의 타입과 타입스크립트 타입의 차이
+
+|자바스크립트|타입스크립트|
+|--|--|
+|Static Types|Dynamic Types|
+|개발하는 중간에 타입을 확인할 수 있다.|런타임에 돌입해야만 타입을 알 수 있다.|
+
+```js
+function add(n1, n2){
+  if(typeof n1 !== "number" || typeof n2 !== "number){
+    throw new Error("Incorrect Input!");
+  }
+  return n1 + n2;
+}
+const result = add(39, 28);
+```
+
+```ts
+function add(n1:number, n2:number){
+  return n1 + n2;
+}
+const result = add(39, 28);
+```
+
+1. 프로그램이 유용하려면, 가장 간단한 데이터 단위로 작업할 수 있어야 한다. Ex) numbers, strings, structures, boolean ...
+1. 타입스크립트에서 자바스크립트에서 기대하는 것과 동일한 타입을 지원하며, 돕기 위해 추가적인 열거 타입을 제공한다.
+
+## 기본 - Type Annotation
+타입스크립트에서는 프로그램 작성을 위해 기본으로 제공하는 타입이 있다. 사용자가 만든 타입은 결국 이 기본 자료형들로 쪼개진다. 자바스크립트의 기본 자료형 6가지와 프로그래밍을 도울 몇가지 타입들이 더 제공된다.
+
+특정한 개체에 어떤 타입인지 명시하는 것을 `Type annotation`이라고 한다. 변수의 이름 뒤에 `:`을 붙여 타입을 명시할 수 있다.
+
+### 기본 - Primitive Type
+
+오브젝트와 레퍼런스 형태가 아닌 실제 값을 저장하는 자료형이다. Primitive 형의 내장 함수를 사용 가능한 것은 자바스크립트 처리 방식 덕분이다. ES2015기준으로 총 6가지의 타입이 있다.
+
+1. literal 값으로 Primitive 타입의 서브 타입을 나타낼 수 있다.
+```js
+  true;
+  "hello";
+  3.14;
+  null;
+  undefined;
+```
+
+2. Wrapper object로 만들 수 있다. 하지만 타입스크립트에서는 이 방식을 권장하지 않는다.
+```js
+new Boolean(false);
+new String("world");
+new Number(42);
+```
 
 [NUMBER]
 
@@ -3743,3 +3811,6 @@ class Car {
 ```
 
 build폴더 내부에 main.js.map이라는 파일이 생겼음을 확인할 수 있다. map 파일은 보기에는 굉장히 난해한 데이터를 담고 있다. 하지만 디버깅 툴과 브라우저에서는 전부 이해할 수 있다. 이제 다시 브라우저를 확인해보면 src폴더에 main.ts를 통해 작성한 타입스크립트를 확인할 수 있다. 이제 디버깅 툴에서 좀 더 쉽게 디버깅할 수 있다.
+
+---
+
