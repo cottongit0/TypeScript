@@ -168,6 +168,8 @@ let person2: string | null;
 
 `null`은 기본적인 데이터를 입력할 수 없어 단독으로 쓰이는 일이 없다. 보통은 `Union`타입과 함께 사용된다. 보편적으로는 Null보다는 undefined를 많이 사용한다.<br/>
 
+
+
 [UNKNOWN]
 
 ```ts
@@ -225,6 +227,14 @@ acceptSomeObject({ animal: "dog" });
 ```
 
 `obeject`로 선언된 변수는 어떤 타입의 데이터도 담을 수 있다. 따라서 구체적으로 object의 타입을 명시하는 것이 중요하다.
+
+```ts
+// Create by object literal
+const person1 = {name : "Mark", age : 39};
+
+// Create by Object.create
+const person2 = Object.create({name : "Mark", age : 39});
+```
 
 ---
 
