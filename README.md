@@ -17,13 +17,13 @@ https://www.typescriptlang.org/
 
 타입스크립트는 프로그래밍 언어로 Compiled Language다. 하지만 전통적인 Compiled Language와는 차이가 있다. 그래서 `Transpile`이라는 용어를 사용하기도 한다. 자바스크립트는 Interpreted Language로 바로 해석해서 실행시키는 언어이다.
 
-|Compiled|Interpreted|
-|---|---|
-|컴파일 O|컴파일 X|
-|컴파일러 필요 O|컴파일러 필요 X|
-|컴파일하는 시점 O| 컴파일하는 시점 X|
-|컴파일된 결과물을 실행하는 시점| 코드를 실행하는 시점(런타임)|
-|컴파일된 결과물을 실행| |
+| Compiled                        | Interpreted                  |
+| ------------------------------- | ---------------------------- |
+| 컴파일 O                        | 컴파일 X                     |
+| 컴파일러 필요 O                 | 컴파일러 필요 X              |
+| 컴파일하는 시점 O               | 컴파일하는 시점 X            |
+| 컴파일된 결과물을 실행하는 시점 | 코드를 실행하는 시점(런타임) |
+| 컴파일된 결과물을 실행          |                              |
 
 ---
 
@@ -74,10 +74,10 @@ operation(연산)을 할 때 함수가 쓰이는데, 코드가 수행된 후에 
 
 ## 기본 - 자바스크립트의 타입과 타입스크립트 타입의 차이
 
-|자바스크립트|타입스크립트|
-|--|--|
-|Static Types|Dynamic Types|
-|개발하는 중간에 타입을 확인할 수 있다.|런타임에 돌입해야만 타입을 알 수 있다.|
+| 자바스크립트                           | 타입스크립트                           |
+| -------------------------------------- | -------------------------------------- |
+| Static Types                           | Dynamic Types                          |
+| 개발하는 중간에 타입을 확인할 수 있다. | 런타임에 돌입해야만 타입을 알 수 있다. |
 
 ```js
 function add(n1, n2){
@@ -90,7 +90,7 @@ const result = add(39, 28);
 ```
 
 ```ts
-function add(n1:number, n2:number){
+function add(n1: number, n2: number) {
   return n1 + n2;
 }
 const result = add(39, 28);
@@ -100,6 +100,7 @@ const result = add(39, 28);
 1. 타입스크립트에서 자바스크립트에서 기대하는 것과 동일한 타입을 지원하며, 돕기 위해 추가적인 열거 타입을 제공한다.
 
 ## 기본 - Type Annotation
+
 타입스크립트에서는 프로그램 작성을 위해 기본으로 제공하는 타입이 있다. 사용자가 만든 타입은 결국 이 기본 자료형들로 쪼개진다. 자바스크립트의 기본 자료형 6가지와 프로그래밍을 도울 몇가지 타입들이 더 제공된다.
 
 특정한 개체에 어떤 타입인지 명시하는 것을 `Type annotation`이라고 한다. 변수의 이름 뒤에 `:`을 붙여 타입을 명시할 수 있다.
@@ -109,15 +110,17 @@ const result = add(39, 28);
 오브젝트와 레퍼런스 형태가 아닌 실제 값을 저장하는 자료형이다. Primitive 형의 내장 함수를 사용 가능한 것은 자바스크립트 처리 방식 덕분이다. ES2015기준으로 총 6가지의 타입이 있다.
 
 1. literal 값으로 Primitive 타입의 서브 타입을 나타낼 수 있다.
+
 ```js
-  true;
-  "hello";
-  3.14;
-  null;
-  undefined;
+true;
+("hello");
+3.14;
+null;
+undefined;
 ```
 
 2. Wrapper object로 만들 수 있다. 하지만 타입스크립트에서는 이 방식을 권장하지 않는다.
+
 ```js
 new Boolean(false);
 new String("world");
@@ -168,9 +171,11 @@ let person2: string | null;
 
 `null`은 기본적인 데이터를 입력할 수 없어 단독으로 쓰이는 일이 없다. 보통은 `Union`타입과 함께 사용된다. 보편적으로는 Null보다는 undefined를 많이 사용한다.<br/>
 
-
+### 기본 - Non-Primitive Type
 
 [UNKNOWN]
+
+응용 프로그램을 작성할 때 모르는 변수의 타입을 묘사해야 할 수도 있다. 이러한 값은 API 등 동적 콘텐츠를 받아올 때 필요하다. 이 경우 컴파일러와 코드를 읽는 사람에게 이 변수가 무엇이든 될 수 있음을 알려주는 타입을 제공하기 위해 `unknown`을 이용한다. any와 같이 아무거나 할당할 수 있지만, 타입을 확정해주지 않으면 다른 곳에 할당할 수 없고, 사용할 수도 없다.
 
 ```ts
 let notSure: unknown = 0;
@@ -189,7 +194,13 @@ let anything: any = 0;
 anything = "hello";
 ```
 
-`any`는 무어잇든 할당할 수 있다. 어떤 것이든 담을 수 있어 가능한한 사용하지 않는 것이 좋다.
+`any`는 무엇이든 할당할 수 있다. 컴파일 타임에 타입체크가 정상적으로 이뤄지지 않아 타입스크립트의 안정성을 해친다. 만약 any 타입이 맞다면 `noImplicitAny`를 설정하여 any가 맞다고 확정시켜 주는 것이 좋다.
+
+```ts
+function returnAny(message: any): any {
+  console.log(message);
+}
+```
 
 [VOID]
 
@@ -205,6 +216,8 @@ let unusable: void = undefined;
 
 [NEVER]
 
+`never`는 리턴하지 못하는 타입으로 주로 에러를 던질 때 사용된다. 리턴할 값을 입력하게 되면 never를 사용할 수 없다. `무한히 반복되는 함수`나 `에러`를 발생하고자 할 때 사용할 수 있다.
+
 ```ts
 function throwError(message: string): never {
   throw new Error(message);
@@ -215,9 +228,26 @@ function loopNever(): never {
 }
 ```
 
-`never`는 리턴하지 못하는 타입으로 주로 에러를 던질 때 사용된다. 리턴할 값을 입력하게 되면 never를 사용할 수 없다. 무한히 반복되는 함수나 에러를 발생하고자 할 때 사용할 수 있다.
+never는 모든 타입의 subtype으로, 모든 타입에 할당할 수 있다. 하지만 never에는 그 어떤 것도 할당할 수 없다. any조차도 never에는 할당할 수 없으며, 잘못된 타입을 넣은 실수를 막고자 할 때 자주 사용된다.
+
+```ts
+let a:string = "hello";
+
+if(typeof a /== "string"){
+  a; // never
+}
+```
+
+```ts
+let a: string | number;
+
+if(typeof a /== "string"){
+  a; // number
+}
+```
 
 [OBJECT]
+Primitive type이 아닌 것을 나타내고 싶을 때 사용된다.
 
 ```ts
 let obj: object = [1, 5];
@@ -230,10 +260,38 @@ acceptSomeObject({ animal: "dog" });
 
 ```ts
 // Create by object literal
-const person1 = {name : "Mark", age : 39};
+const person1 = { name: "Mark", age: 39 };
+// person1의 타입은 Object가 아니라 {name : "Mark", age : 39}이다.
 
 // Create by Object.create
-const person2 = Object.create({name : "Mark", age : 39});
+const person2 = Object.create({ name: "Mark", age: 39 });
+```
+
+[ARRAY]
+
+같은 타입의 요소들을 함께 모아둔 자료형이다. 배열 안에 있는 요소들은 모두 `같은 타입`이다.
+
+```ts
+let list: number[] = [1, 2, 3];
+let list: Array<number> = [1, 2, 3];
+// jsx, psx 파일과 충돌이 일어날 수 있으므로 위 방법이 선호된다.
+
+// Union type
+let list: (number | string)[] = [1, 2, 3, "4"];
+```
+
+[TUPLE]
+길이가 정해져있고 앞 뒤의 타입이 정확해야 한다.
+
+```ts
+let x: [string, number];
+x = ["hello", 39];
+x = [10, "Mark"]; // Error!!
+```
+
+```ts
+const person: [string, number] = ["Mark", 39];
+const [first, second] = person;
 ```
 
 ---
@@ -692,7 +750,24 @@ dayOfWeek = "Tuesday";
 
 ---
 
-## 기본 - Type Inferencs(타입추론)
+## 기본 - 작성자와 사용자의 관점으로 코드 바라보기
+
+하나의 함수를 두고 사용자와 구현자가 나누어진다. 자신의 코드에서 해당 함수를 사용하는 `사용자`와 해당 함수를 구현하는 `구현자`가 있다.
+
+타입이란 해당 변수가 할 수 있는 일을 결정한다. 자바스크립트에서는 타입을 명시하지 않아, 함수 사용법에 대해 오해를 야기하곤 한다.
+
+f2라는 함수가 있다. 구현자는 매개변수 a에는 number 타입의 변수가 들어가야 한다는 가정 하에 함수를 작성했다. 하지만 사용자가 사용법을 숙지하지 않고 문자열을 사용하여 함수를 사용한다면 곤란해진다. 그렇다고 구현자의 모든 함수를 사용자가 샅샅이 살펴보며 숙지하기란 어렵고 번거로운 일이다.
+
+```js
+function f2(a) {
+  return a * 38;
+}
+
+console.log(f2(10)); // 380
+console.log(f2("Mark")); //NaN
+```
+
+### 기본 - Type Inferencs(타입추론)
 
 타입스크립트에서 자체적으로 타입을 결정하는 경우가 있다.
 
@@ -725,7 +800,101 @@ add 함수의 리턴값에는 타입이 명시되어 있지 않지만 x와 y 값
 
 그래서 타입스크립트는 자체적으로 add함수는 number타입을 리턴할 것으로 추론한다.
 
-타입을 명시할 필요없이 타입스크립트는 자체적으로 타입을 추론한다. 하지만 코드가 복잡해질 수록 추론은 어려워진다. 모든 경우에서는 타입을 정확하게 명시하는 것이 중요하다.
+하지만 타입스크립트의 추론에 의지하는 경우, 자바스크립트와 동일한 문제를 야기할 수 있다.
+
+```ts
+function f3(a) {
+  return a * 38;
+}
+
+console.log(f2(10)); // 380
+console.log(f2("Mark")); //NaN
+```
+
+타입스크립트 코드지만, a의 타입은 명시적으로 지정되어 있지 않다. 타입스크립트의 추론은 완벽하지 않아서 a의 타입을 any로 추론하게 된다. 함수의 리턴 값은 number로 추론된다. a는 any이기 때문에 타입스크립트 컴파일러 입장에서 문자열을 사용해도 올바른 방법이라고 인식하게 된다.
+
+타입을 명시할 필요없이 타입스크립트는 자체적으로 타입을 추론한다. 하지만 코드가 복잡해질 수록 추론은 어려워진다. 모든 경우에서는 타입을 정확하게 명시하는 것이 중요하다. 이때 `noImplicityAny` 옵션을 설정하면 타입스크립트가 추론 중 any라고 판단할 시, 컴파일 에러를 발생시켜 명시적으로 지정할 수 있도록 유도해준다.
+
+```ts
+function f4(a: number) {
+  if (a > 0) {
+    return a * 38;
+  }
+}
+console.log(f4(-5)); //NaN
+```
+
+사용자는 사용법에 맞게 숫자형을 사용하여 함수를 실행하였다. 하지만 if 조건에 만족하지 못하여 undefined + 5가 실행되어 NaN이 출력되었다. 기본적으로 모든 타입에는 자동으로 `null`과 `undefined`가 포함되어 있다. 기본값을 제거하기 위해서는 `strictNullChecks`를 설정함으로써 해결할 수 있다. 옵션을 키면 함수 실행 부분에 에러가 발생함을 확인할 수 있다.
+
+```ts
+function f4(a: number): number {
+  if (a > 0) {
+    return a * 38;
+  }
+}
+```
+
+함수에 반환 타입을 정해줄 수 있다. 위 함수는 if 조건이 맞을 때만 값을 반환한다. 모든 상황에서 반환을 하고 있지 않아 컴파일 에러를 발생시킨다. 이때 `noImplicitReturns` 옵션을 활성화하면 함수 내에서 모든 코드가 값을 리턴하지 않으면, 컴파일 에러를 발생시킨다.
+
+```js
+function f6(a) {
+  return `이름은 ${a.name}이고, 연령대는 ${
+    Math.floor(a.age / 10) * 10
+  }대 입니다.`;
+}
+
+console.log(f6({ name: "Mark", age: 38 }));
+//이름은 Mark 이고, 연령대는 30대 입니다.
+console.log(f6("Mark"));
+//이름은 undefined 이고, 연령대는 NaN대 입니다.
+```
+
+매개변수에 Object가 들어오면 예상치 못한 상황이 발생하곤 한다. 그래서 Object Literal Type으로 타입을 지정해줄 수 있다.
+
+```ts
+function f6(a: { name: string; age: number }): string {
+  return `이름은 ${a.name}이고, 연령대는 ${
+    Math.floor(a.age / 10) * 10
+  }대 입니다.`;
+}
+
+console.log(f6({ name: "Mark", age: 38 }));
+//이름은 Mark 이고, 연령대는 30대 입니다.
+console.log(f6("Mark"));
+// Error!
+```
+
+하지만 Object Literal Type은 받아야 할 데이터가 많아질 수록 작성이 번거로워진다. 이는 interface, type allias를 이용하면 해결할 수 있다.
+
+---
+
+## 기본 - Structural type system
+
+타입스크립트는 `Structural type system`를 따르고 있으며, 구조가 같다면 다른 이름이어도 같은 타입이라고 본다.
+
+```ts
+interface IPerson {
+  name: string;
+  age: number;
+  speak(): string;
+}
+
+type PersonType = {
+  name: string;
+  age: number;
+  speak(): string;
+};
+
+let personInterface: IPerson = {} as any;
+let personType: PersonType = {} as any;
+
+persontInterface = personType;
+personeType = personInterfase;
+```
+
+---
+
+## 기본 - 타입 호환성
 
 ---
 
@@ -3823,4 +3992,3 @@ class Car {
 build폴더 내부에 main.js.map이라는 파일이 생겼음을 확인할 수 있다. map 파일은 보기에는 굉장히 난해한 데이터를 담고 있다. 하지만 디버깅 툴과 브라우저에서는 전부 이해할 수 있다. 이제 다시 브라우저를 확인해보면 src폴더에 main.ts를 통해 작성한 타입스크립트를 확인할 수 있다. 이제 디버깅 툴에서 좀 더 쉽게 디버깅할 수 있다.
 
 ---
-
