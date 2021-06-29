@@ -518,6 +518,8 @@ let another: PersonTuple = ["Anna", 24];
 type EatType = (food: string) => void;
 ```
 
+> 목적이나 존재가치가 명확하면 interface를, 어떤 타입을 가리킬 뿐이라면 type alias가 사용되는 편이다.
+
 ---
 
 ## Union types <OR>
