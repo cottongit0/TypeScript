@@ -446,7 +446,7 @@ const [name, age] = student;
 
 ## 기본 - Type Alias
 
-**[Type Alias]**
+`Aliasing Primitive`를 통해 Primitive type을 다른 이름으로 사용할 수 있다.
 
 ```ts
 type Text = string;
@@ -478,8 +478,8 @@ const student: Student = {
 };
 ```
 
-[String Listeral Types] <br/>
-타입을 `문자열`도 지정할 수 있다.
+`String Listeral Types`
+타입을 `문자열`로 지정할 수 있다.
 
 ```ts
 type Name = "name";
@@ -491,6 +491,32 @@ const json: JSON = "json";
 ```
 
 cottonName 변수에는 NAME 타입을 따라간다. 즉, cottonName에는 오직 "name"이라는 문자열만 할당할 수 있다.
+
+union타입을 작성할 때 하나하나 작성하는 번거로움이 있다. `Aliasing Union Type`를 이용하면 반복작성하는 번거로움을 줄일 수 있다.
+
+```ts
+let person: string | number = 0;
+person = "Mark";
+
+type StringOrNumber = string | number;
+
+let another: StringOrNumber = 0;
+another = "Anna";
+```
+
+`Aliasing Tuple`도 가능하다.
+
+```ts
+let person: [string, number] = ["Mark", 35];
+type PersonTuple = [string, number];
+let another: PersonTuple = ["Anna", 24];
+```
+
+매개변수로 함수를 넣을 때가 있다. `Aliasing Function`을 통해 반복사용할 수 있다.
+
+```ts
+type EatType = (food: string) => void;
+```
 
 ---
 
@@ -894,10 +920,6 @@ personeType = personInterfase;
 
 ---
 
-## 기본 - 타입 호환성
-
----
-
 ## 기본 - Type Assertion
 
 타입스크립트는 타입이 없는 자바스크립트와 함께 연동되는 경우가 있다. 그래서 `type assertion`을 불가피하게 사용해야 되는 경우가 있다. 예를 들어 자바스크립트 함수에 string과 관련된 함수가 있다 해보자.
@@ -977,6 +999,87 @@ const button = document.querySelector("class")!;
 ```
 
 하지만 `type assertion`은 가능하면 피해서 쓰는 것이 좋다. 잘못하면 에러를 발생시켜 애플리케이션이 종료될 수 있기 때문이다.
+
+---
+
+## 기본 - 타입 호환성
+
+하위타입(Subtype)에는 상위타입(Super type)을 넣을 수 없다.
+
+```ts
+let sub1: 1 = 1;
+let sup1: number = sub1;
+sub1 = sup1; // ERROR!
+
+let sub2: number[] = [1];
+let sup2: object = sub2;
+sub2 = sup2; // ERROR!
+
+let sub3: [number, number] = [1, 2];
+let sup3: number[] = sub3;
+sub3 = sup3; // ERROR!
+
+class Animal {}
+class Dog extends Animal {
+  eat() {}
+}
+let sub6: Dog = new Dog();
+let sup6: Animal = sub6;
+sub6 = sup6; //ERROR!
+```
+
+any는 상위, 하위 상관없이 모든 값을 삽입할 수 있다.
+
+```ts
+let sub4: number = 1;
+let sup4: any = sub4;
+sub4 = sup4;
+```
+
+그래서 같거나 서브 타입인 경우, 할당이 가능하며 이를 `공변`이라고 한다.
+
+```ts
+let sup7: string = "";
+let sup7: string | number = sub7;
+
+let sub8: { a: string; b: number } = { a: "", b: 1 };
+let sup8: { a: string | number; b: number } = sub8;
+
+let sub9: Array<{ a: string; b: number }> = [{ a: "", b: 1 }];
+let sup9: Array<{ a: stirng | number; b: number }> = sub9;
+```
+
+그리고 함수의 매개변수 타입만 같거나 슈퍼타입인 경우, 할당이 가능한 것을 `반병`이라고 한다.
+
+```ts
+class Person{}
+class Developer extends Person{
+  coding(){}
+}
+class StartupDeveloper extends Developer{
+  burning(){}
+}
+
+function tellme(f: (d:Devleoper) => Developer){}
+
+// Developer => Developer에다가 Developer => Developer를 할당하는 경우
+tellme(function pToD(d: Devleoper):Developer){
+  return new Developer();
+}
+
+// Developer => Developer 에다가 Person => Developer를 할당하는 경우
+tellme(function pToD(d: Person): Developer){
+  return new Developer();
+}
+
+//Developer => Developer 에다가 StartupDeveloper를 할당하는 경우
+tellme(function sToD(d: StartupDeveloper): Developer){
+  return new Developer():
+}
+
+```
+
+StartupDeveloper에는 burning 함수가 있지만 Developer에는 없다. 논리적으로는 문제가 있으나 타입스크립트는 융통성있게 이를 처리한다. 만약 함수를 할당할 시에 함수의 매개변수 타입이 같거나 슈퍼타입이 아닌 경우 에러를 통해 경고받고 싶다면 `strictFunctionTypes`옵션을 활성화할 수 있다.
 
 ---
 
