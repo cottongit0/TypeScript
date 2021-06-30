@@ -1130,6 +1130,63 @@ extends의 경로를 입력하면 해당 json파일을 상속한다.
 [include]
 exclude보다 약하며, \*같은 걸 사용하면 .ts, .tsx, d.ts만 include된다. 만약 js 파일도 컴파일하고 싶다면 allowJS를 설정하면 된다.
 
+### tsconfig - compileOptions - typeRoots, types
+
+자바스크립트 라이브러리는 js파일이기 떄문에 type이 설정되어 있지 않다. 그래서 타입을 지정해주는 도구들이 필요하다. 예를 들어, React를 사용해보자.
+
+```
+npm install react
+```
+
+그리고 React 파일을 타입스크립트에 import하면 에러가 발생한다.
+
+```ts
+import React from "react";
+// "React" is declared but its value is never read.
+```
+
+타입이 존재하지 않아 타입스크립트가 React를 읽을 수 없다. 에러 문구를 읽어보면 `npm i --save-dev @types/react`를 실행해보라는 메시지를 확인해볼 수 있다. 터미널을 통해 실행해보자. 이제 node_modules라는 파일에 @types라는 폴더가 생긴 것을 확인할 수 있다. 그리고 그 파일 내부에는 react 폴더가 존재한다. 더이상 import는 에러가 발생하지 않는다.
+
+하지만 종종 module을 사용하다보면 @types가 없는 module이 존재한다. 그럴 때, `typeRoots`에 경로를 설정하면 배열 안에 들어있는 경로들을 찾아준다. `types`는 패키지의 이름을 입력할 수 있다. ./node_modules/@types/ 안의 모듈 이름에서 찾아오며, 빈 배열을 입력하면 시스템을 이용하지 않겠다는 의미이다. typeRoots와 types는 같이 사용되지 않는다.
+
+### tsconfig - compileOptions - target, lib
+
+`target`은 빌드의 결과물을 어떤 버전으로 할지 설정할 수 있다.
+
+`lib`은 기본 type definition 라이브러리로 어떤 것을 사용할지 정할 수 있다. lib을 지정하지 않으면 target에서 설정한 버전에 따라 다른 라이브러리를 사용한다. lib을 지정하면 그 lib 배열로만 라이브러리를 사용한다.
+
+### tsconfig - compileOptions - outDir, outFile, rootDir
+
+`outDir`은 컴파일된 파일을 담을 폴더를 설정할 수 있다.
+
+`rootDir`은 자바스크립트 파일로 컴파일할 상위 폴더를 설정할 수 있다.
+
+`outFile`은 여러 모듈을 하나의 파일로 만들 때 사용된다.
+
+### tsconfig - compileOptions - strict
+
+타입스크립트를 사용할 때는 `strict`를 true로 설정하는 것이 기본이다. strict에는 다양한 설정을 할 수 있다. strict를 이용하면 타입의 안정성을 더욱더 보장할 수 있다.
+
+`noImplicitAny`는 명시적이지 않게 any 타입을 사용하여 표현식과 선언에 사용하면 에러를 발생시킨다. 만약 타입스크립트가 타입을 any라고 추론하였고 이것이 개발자가 의도한 것이라면 반드시 any라고 지정해야 에러가 발생하지 않는다. noImplicityAny를 사용할 때, 인덱스 객체에 인덱스 시그니처가 없는 경우 오류를 발생시킨다. 사용이 많이 불편해지는데 이를 해결하고 싶다면 `suppressImplicitAnyIndexErrors`를 설정할 수 있다.
+
+`noImplicitThis`는 명시적이지 않게 any타입을 사용하여 this 표현식에 사용하면 에러를 발생시킨다. 첫번째 매개변수 자리에 this를 놓고, this에 대한 타입을 어떤 것이라도 표현하지 않으면, noImplicityAny가 오류를 발생시킨다. 그래서 this를 any로 명시적으로 지정하는 것이 합리적이다.
+
+`strictNullChecks`는 null과 undefined 값이 모든 유형의 도메인에 속하지 않으며, 그 자신을 타입으로 가지거나 any일 경우에만 할당이 가능하도록 만든다. 단 undefined에 void는 할당할 수 있다. 만약 이를 설정하지 않으면, 모든 타입이 null과 undefined 값을 갖게 된다. 즉, string으로 타입을 지정해도 null 혹은 undefined를 할당할 수 있다는 것이다.
+
+`strictFunctionTypes`는 함수 타입에 대한 bivariant 매개변수 검사를 비활성화한다. 반환타입은 공변적이어야 하고 인자타입은 반공벽적이어야 한다. 그런데 타입스크립트에서 인자타입은 공변적이면서 반공변적이다. 이 문제를 해결하기 위해 strictFunctionTypes를 설정할 수 있다.
+
+```ts
+const button = document.querySelector("#id") as HTMLButtonElement;
+button.addEventListener("keydown", (e: MouseEvent) => {});
+// 위와 같은 코드도 에러를 발생시키지 않았지만, 이제는 에러가 발생한다.
+```
+
+`strictPropertyInitialization`은 정의되지 않은 클래스의 속성이 생성자에서 초기화되었는지 확인한다. 이 옵션을 사용하려면 strictNullChecks를 사용하도록 설정해야 한다.
+
+`strictBindCallApply` Function의 내장 함수인 bind, call, apply를 사용할 때 더 엄격한 검사를 수행한다. bind는 해당 함수 안에서 사용할 this와 인자를 설정해주는 역할을 하고, call과 apply는 this와 인자를 설정한 후 실행한다. call은 함수의 인자를 여러 인자의 나열로 넣어서 사용하고, apply는 모든 인자를 배열 하나로 넣어서 사용한다.
+
+`alwaysStrict`는 각 소스 파일에 대해 자바스크립트의 strict mode 코드를 분석하고 'use strict'를 해제한다.
+
 ---
 
 # OOP(Obeject Oriented Programming)
