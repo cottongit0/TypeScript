@@ -1085,6 +1085,53 @@ StartupDeveloper에는 burning 함수가 있지만 Developer에는 없다. 논�
 
 ---
 
+# Compilation Context - tsconfig.json 설정하기
+
+어떤 파일을 컴파일할 것인지, 어떤 방식으로 컴파일할 것인지는 `tsconfig.json`에 적혀있다. tsconfig를 어떻게 설정하느냐에 따라서 결과물도 달라진다.
+
+타입스크립트 기본설정으로 tsconing.json을 생성해보자.
+
+```
+npm init -y
+npm i typescript -D
+npx tsc --init
+```
+
+생성한 tsconfig.json에는 최상위 프로퍼티가 compilerOptions 밖에 없을 것이다. 하지만 우리는 최상위 프로퍼티로 extends, compileOnSave, files, include, exclude, references를 사용할 수 있다.
+
+## tsconfig.json - compileOnSave
+
+```json
+{
+  "compileOnSave": true
+}
+```
+
+compileOnSave는 저장 후 컴파일을 사용할 것인지 유무를 설정할 수 있다.
+
+## tsconfig.json - extends
+
+```json
+{
+  "extends": "path"
+}
+```
+
+extends의 경로를 입력하면 해당 json파일을 상속한다.
+
+## tsconfig.json - files, include, exclude
+
+[files]
+상대 혹은 절대 경로의 리스트 배열로, exclue보다 강력하다.
+
+[exclude]
+설정 안하면 4가지(node_modules, bower_components, jspm_packages, <outDir>)를 default로 제외한다. <outDir>은 include에 있어도 항상 제외한다.
+
+[include]
+exclude보다 약하며, \*같은 걸 사용하면 .ts, .tsx, d.ts만 include된다. 만약 js 파일도 컴파일하고 싶다면 allowJS를 설정하면 된다.
+
+---
+
 # OOP(Obeject Oriented Programming)
 
 `객체지향 프로그래밍(OOP)`는 프로그래밍 패러다임이다. 이 패러다임은 프로그래밍을 하는 여러가지 스타일 중에 한 가지 방식이다. OOP는 오브젝트 객체들을 컨셉으로 하여 프로그래밍을 해나가는 방식을 의미한다. 이 오브젝트는 관련된 데이터나 코드를 함께 묶을 수 있다. 다양한 프로그래밍 언어로 객체지향 프로그래밍 스타일을 구현할 수 있다. 언어마다 어떤 방식으로 어떤 문법을 통해서 객체지향을 구현할 수 있는지는 조금씩 달라지지만 전반적인 개념과 사용방법, 코딩방식에는 큰 차이가 나지 않는다. 한 언어로 객체지향을 충분히 마스터하면 다른 프로그래밍 언어를 공부하는 것은 크게 어렵지 않다.
