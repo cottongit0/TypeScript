@@ -1498,6 +1498,62 @@ let mi: MergingInterface;
 
 ---
 
+## class
+
+`class`는 object를 만드는 청사진이다. 클래스 이전에 오브젝트를 만드는 기본적인 방법은 함수였으나, ES6이후로는 자바스크립트에서도 클래스를 사용할 수 있게 되었다. 이 클래스는 OOP의 핵심으로 타입스크립트에서는 클래스도 사용자가 만드는 타입 중 하나라고 볼 수 있다.
+
+class는 보통 대문자를 이용하며, `new`를 이용하여 class를 통해 object를 만들 수 있다. `constructor`를 이용하여 오브젝트를 생성하며 값을 전달할 수 있으며, `this`를 이용해서 만들어진 오브젝트를 가리킬 수 있다.
+
+```ts
+class Person {
+  name;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+}
+const p1 = new Person("Mark");
+
+console.log(p1);
+```
+
+### class - constructor & initialize
+
+constructor 없이 initialize를 통해서도 class에서 값을 할당할 수 있다. default값을 입력해주면 해당 값이 할당된다. 하지만 클래스 내부에서 값이 초기화되지 않으면 에러를 발생한다. 외부에서 값을 할당해도 런타임 상에서는 할 수 없다. 그럴 때는 `!`를 붙여주면 해결할 수 있다. `!` 기호는 사용할 떄 주의할 필요가 있다. 만약 존재하지 않은 값을 존재한다고 표시하면 런타임 상에는 에러가 발생하지 않지만 컴파일에서 문제가 발생하게 된다. 어디서 문제가 발생한 건지 알기 어렵기 때문에 사용시 유의할 필요가 있다.
+
+```ts
+class Person {
+  name: string = "Mark";
+  age!: number;
+}
+const p1 = new Person();
+p1.age = 39;
+
+console.log(p1);
+```
+
+만약 constructor로도 받고 싶고 initialize 형태로도 받고 싶다면 어떤 방식을 사용해야 할까? constructor로 생성하고자 하는 오브젝트를 옵셔널로 설정하고, undefined 값이 할당되지 않았을 시의 default 값을 설정해주면 된다.
+
+```ts
+class Person {
+  name: string = "Mark";
+  age!: number;
+  constructor(age?: number) {
+    if (age === undefined) {
+      this.age = 20;
+    } else {
+      this.age = age;
+    }
+  }
+}
+const p1 = new Person();
+const p2 = new Person(39);
+
+console.log(p1);
+```
+
+---
+
 # OOP(Obeject Oriented Programming)
 
 `객체지향 프로그래밍(OOP)`는 프로그래밍 패러다임이다. 이 패러다임은 프로그래밍을 하는 여러가지 스타일 중에 한 가지 방식이다. OOP는 오브젝트 객체들을 컨셉으로 하여 프로그래밍을 해나가는 방식을 의미한다. 이 오브젝트는 관련된 데이터나 코드를 함께 묶을 수 있다. 다양한 프로그래밍 언어로 객체지향 프로그래밍 스타일을 구현할 수 있다. 언어마다 어떤 방식으로 어떤 문법을 통해서 객체지향을 구현할 수 있는지는 조금씩 달라지지만 전반적인 개념과 사용방법, 코딩방식에는 큰 차이가 나지 않는다. 한 언어로 객체지향을 충분히 마스터하면 다른 프로그래밍 언어를 공부하는 것은 크게 어렵지 않다.
