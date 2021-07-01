@@ -1189,6 +1189,315 @@ button.addEventListener("keydown", (e: MouseEvent) => {});
 
 ---
 
+## Interface - 기본
+
+`interface`는 자바스크립트에서는 없는 문법으로 타입스크립트에서 굉장히 중요한 기능을 한다. 내부는 숨겨져 있고 외부로는 노출되어 있는 호출방식이다. 그래서 내부적인 것과 관계없이 외부적으로 드러나는 객체의 사용방식이 적혀있는 타입이다.
+
+```ts
+function hello1(person: {name:string; age:number} : void){
+  console.log(`안녕하세요. ${person.name}입니다.`);
+}
+
+const p1: {name:string; age:number} = {
+  name: "Mark",
+  age: 39,
+}
+
+hello(p1);
+```
+
+함수 hello1과 p1은 같은 구조이다. 변수의 구조가 똑같다면 매번 반복하는 것은 번거로운 일이다. 이럴 때 우리는 `interface`를 사용할 수 있다.
+
+```ts
+interface Person1 {
+  name:string;
+  age:number;
+}
+
+function hello1(person: Person1 : void){
+  console.log(`안녕하세요. ${person.name}입니다.`);
+}
+
+const p1: Person1 = {
+  name: "Mark",
+  age: 39,
+}
+
+hello(p1);
+```
+
+interface를 이용하여 Person1이라는 구조를 만들어주면 더이상 긴 문장을 반복할 필요없이 Person1을 사용해주기만 하면 된다. 컴파일된 JS파일에 가면 interface라는 문장을 찾아볼 수 없다. 자바스크립트에서는 없는 문법이기 때문에 interface를 사용할 수 없다. 즉, interface는 실제로 컴파일되었을 때는 사라지게 된다. 컴파일 타임에만 필요하며 문제가 없는지 관계를 규명하여 체크해주는 역할을 한다.
+
+### Interface - optional property 1
+
+상황에 따라 항상 필요한 변수가 있고 아닌 변수가 있다. interface에서도 이를 `optional`로 지정하여 사용할 수 있다. 변수 뒤에 `?`를 붙여 optional로 설정할 수 있다. 그러면 해당 변수는 호출될 때 반드시 작성될 필요가 없어진다.
+
+```ts
+interface Person2 {
+  name:string;
+  age?:number;
+}
+
+function hello2(person: Person2 : void){
+  console.log(`안녕하세요. ${person.name}입니다.`);
+}
+
+hello2({name: "Mark"});
+
+```
+
+### Interface - optional property 2
+
+`indexable type`은 어떤 의미의 프로퍼티든지 추가로 설정할 수 있다.
+
+```ts
+interface Person3 {
+  name:string;
+  age?:number;
+  [index:string]: any;
+}
+
+function hello3(person: Person3 : void){
+  console.log(`안녕하세요. ${person.name}입니다.`);
+}
+
+const p31: Person3 = {
+  name: "Mark",
+  age: 39,
+}
+
+const p32: Person3 = {
+  name: "Anna",
+  systers: ["Sung", "Chan"].
+}
+
+const p33: Person3 = {
+  name: "Bokdengi",
+  father: p31,
+  mother: p32,
+}
+
+hello3(p33);
+
+```
+
+### Interface - function in interface
+
+interface 안에 함수를 정의할 수 있다.
+
+```ts
+interface Person4 {
+  name: string;
+  age: number;
+  hello(): void;
+}
+
+const p41: Person4 = {
+  name: "Mark",
+  age: 39,
+  hello: function (): void {
+    console.log(`안녕하세요. ${this.name}입니다.`);
+  },
+};
+
+const p42: Person4 = {
+  name: "Mark",
+  age: 39,
+  hello(): void {
+    console.log(`안녕하세요. ${this.name}입니다.`);
+  },
+};
+
+const p43: Person4 = {
+  name: "Mark",
+  age: 39,
+  hello: (this: Person4): void => {
+    // console.log(`안녕하세요. ${this.name}입니다.`);
+    // arrow function은 호출한 곳의 값을 받기 때문에 this를 사용하면 에러가 발생한다.
+  },
+};
+
+p41.hello();
+p42.hello();
+```
+
+### Interface - class implements interface
+
+class의 interface를 `implements`하면 타입을 사용할 수 있다. interface의 구현사항에 맞게 설정해야 한다. interface로 부터 구현된 class는 interface에 있는 내용들을 모두 사용할 수 있다.
+
+```ts
+interface IPerson1 {
+  name: string;
+  age?: number;
+  hello(): void;
+}
+
+class Person implements IPerson1 {
+  name: string;
+  age?: number | undefined;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+  hello(): void {
+    console.log(`안녕하세요. ${this.name}입니다.`);
+  }
+}
+
+const person = new Person("Mark");
+// const person: IPerson1 = new Person("Mark");
+person.hello();
+```
+
+### Interface - interface extends interface
+
+`extends`는 상속으로 interface끼리 상속이 가능하다.
+
+```ts
+interface IPerson2 {
+  name: string;
+  age?: number;
+}
+
+interface IKorean extends IPerson2 {
+  city: string;
+}
+
+const k: IKorean = {
+  name: "이웅재",
+  age: 39,
+  city: "서울",
+};
+```
+
+### Interface - function interface
+
+interface로 구현된 함수는 interface의 구현사항을 똑같이 구현해야 한다.
+
+```ts
+interface HelloPerson {
+  (name: string, age?: number): void;
+}
+const helloPerson: HelloPerson = function (name: string) {
+  console.log(`안녕하세요. ${name}입니다.`);
+};
+
+helloPerson("Mark", 39);
+```
+
+interface를 구현한 함수를 호출할 때도 호출된 함수는 interface의 규격을 따라간다. 그래서 helloPerson에 age 매개변수를 받지 않음에도 오류가 발생하지 않는다.
+
+```ts
+// ERROR!
+const helloPerson: HelloPerson = function (name: string, age: number) {
+  console.log(`안녕하세요. ${name}입니다.`);
+};
+```
+
+HelloPerson 인터페이스에서는 age를 옵셔널로 받고 있다. 만약 helloPerson 함수에서 age를 확정적으로 받는다면 오류가 발생한다. 모든 타입들은 undefined도 기본으로 갖고 있기 때문이다. 더 큰 것을 작은 것에 할당할 수 없기 때문에 오류가 발생하는 것이다.
+
+### Interface - readonly
+
+interface의 프로퍼티에 `readonly`를 사용하면 읽기전용으로 바꿀 수 있다. 외부에서는 해당 프로퍼티를 변경할 수 없으며 오로지 읽는 것만 가능하다.
+
+```ts
+interface Person8 {
+  name: string;
+  age?: number;
+  readonly gender: string;
+}
+
+const p81: Person8 = {
+  name: "Mark",
+  gender: "male",
+};
+
+p81.gender = "female"; // ERROR!
+```
+
+---
+
+## type alias VS interface
+
+1. function
+
+```ts
+type EatType = (food: string) => void;
+
+interface IEat {
+  (food: string): void;
+}
+```
+
+2. array
+
+```ts
+type PersonList = string[];
+
+interface IPersonList {
+  [index: number]: string;
+}
+
+// indexabel type은 [index: string]: string으로 사용된다.
+// 배열로만 사용하고 싶을 때는 [index: number]를 사용하면 된다.
+```
+
+3. intersection
+
+```ts
+interface ErrorHandling {
+  success: boolean;
+  error?: { message: string };
+}
+interface ArtistsData {
+  artists: { name: string };
+}
+
+// type alias
+type ArtistsRespnseType = ArtistsData & ErrorHadling;
+// interface
+interface IArtistsResponse extends ArtistsData, ErrorHandling {}
+
+let art1: ArtistsRespnseType;
+let art2: IArtistsResponse;
+```
+
+4. union types
+
+union 타입은 interface와 class에서 사용할 수 없다.
+
+```ts
+interface Bird {
+  fly(): void;
+  layEggs(): void;
+}
+interface Fish {
+  swim(): void;
+  layEggs(): void;
+}
+
+type PetType = Bird | Fish;
+
+interface IPet extends PetType {} // ERROR!
+class Pet implements PetType {} // ERROR!
+```
+
+5. Declaration Merging - interface
+
+interface를 똑같은 이름으로 여러번 생성해도 모두 합쳐져서 사용할 수 있다. type alias에서는 불가능하다.
+
+```ts
+interface MergingInterface {
+  a: string;
+}
+interface MergingInterface {
+  b: string;
+}
+let mi: MergingInterface;
+```
+
+---
+
 # OOP(Obeject Oriented Programming)
 
 `객체지향 프로그래밍(OOP)`는 프로그래밍 패러다임이다. 이 패러다임은 프로그래밍을 하는 여러가지 스타일 중에 한 가지 방식이다. OOP는 오브젝트 객체들을 컨셉으로 하여 프로그래밍을 해나가는 방식을 의미한다. 이 오브젝트는 관련된 데이터나 코드를 함께 묶을 수 있다. 다양한 프로그래밍 언어로 객체지향 프로그래밍 스타일을 구현할 수 있다. 언어마다 어떤 방식으로 어떤 문법을 통해서 객체지향을 구현할 수 있는지는 조금씩 달라지지만 전반적인 개념과 사용방법, 코딩방식에는 큰 차이가 나지 않는다. 한 언어로 객체지향을 충분히 마스터하면 다른 프로그래밍 언어를 공부하는 것은 크게 어렵지 않다.
