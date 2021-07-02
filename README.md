@@ -1517,9 +1517,11 @@ const p1 = new Person("Mark");
 console.log(p1);
 ```
 
+> 생성자에서는 async를 설정할 수 없다.
+
 ### class - constructor & initialize
 
-constructor 없이 initialize를 통해서도 class에서 값을 할당할 수 있다. default값을 입력해주면 해당 값이 할당된다. 하지만 클래스 내부에서 값이 초기화되지 않으면 에러를 발생한다. 외부에서 값을 할당해도 런타임 상에서는 할 수 없다. 그럴 때는 `!`를 붙여주면 해결할 수 있다. `!` 기호는 사용할 떄 주의할 필요가 있다. 만약 존재하지 않은 값을 존재한다고 표시하면 런타임 상에는 에러가 발생하지 않지만 컴파일에서 문제가 발생하게 된다. 어디서 문제가 발생한 건지 알기 어렵기 때문에 사용시 유의할 필요가 있다.
+constructor 없이 initialize를 통해서도 class에서 값을 할당할 수 있다. default값을 입력해주면 해당 값이 할당된다. 만약 개발자가 만든 생성자가 하나라도 있다면, default 생성자는 사라진다. 하지만 클래스 내부에서 값이 초기화되지 않으면 에러를 발생한다. 외부에서 값을 할당해도 런타임 상에서는 할 수 없다. 그럴 때는 `!`를 붙여주면 해결할 수 있다. `!` 기호는 사용할 떄 주의할 필요가 있다. 만약 존재하지 않은 값을 존재한다고 표시하면 런타임 상에는 에러가 발생하지 않지만 컴파일에서 문제가 발생하게 된다. 어디서 문제가 발생한 건지 알기 어렵기 때문에 사용시 유의할 필요가 있다.
 
 ```ts
 class Person {
@@ -1551,6 +1553,315 @@ const p2 = new Person(39);
 
 console.log(p1);
 ```
+
+### class - Access Modifiers(접근 제어자)
+
+접근제어자는 클래스 내부의 모든 곳(생성자, 프로퍼티, 메소드)에서 설정 가능하다. 기본적으로 class 내부에 생성된 모든 프로퍼티는 public으로 설정되어 있다. 접근 제어자를 이용하여 외부에서 접근할 수 있는지 여부를 결정할 수 있다. 디폴트 값인 public으로 설정된 모든 프로퍼티는 외부에서 접근할 수 있다. 클래스 내부에서만 접근은 허용한다면 `private`를 이용할 수 있다. private를 이용한 프로퍼티는 더이상 외부에서 호출할 수 없다. 오직 클래스 내부에서만 사용이 가능하다.
+
+생성자에 private를 사용하면 더이상 외부에서 오브젝트를 사용할 수 없다. 그래서 new를 이용하여 오브젝트를 생성하면 에러가 발생한다.
+
+```ts
+class Person {
+  name: string = "Mark";
+  age!: number;
+  private constructor(age?: number) {
+    if (age === undefined) {
+      this.age = 20;
+    } else {
+      this.age = age;
+    }
+  }
+
+  async init() {}
+}
+const p = new Person(39); // ERROR!
+```
+
+프로퍼티의 접근을 private로 변경하면 외부에서 접근할 수 없다. 접근 제어자가 없을 당시에는 `_` 기호를 통해 외부에서 접근하면 안됨을 알리기도 했다. 이것이 쭉 이어지면서 접근 제어자가 생긴 이후에도 외부에서 호출해서는 안되는 프로퍼티에는 \_ 기호를 붙이기도 한다.
+
+```ts
+class Person {
+  name: string = "Mark";
+  private _age!: number;
+}
+const p = new Person(39);
+console.log(p1.age); //ERROR!
+```
+
+다른 접근 제어자로는 protected가 있다. 외부에서 접근이 불가능하지만 같은 상속관계의 클래스에서는 접근이 가능하다.
+
+### class - initialization in contructor parameters
+
+클래스 내부의 프로퍼티를 초기화할 때마다 선언해주고 할당해주는 방식은 번거롭다. 생성자 내부에서 프로퍼티에 접근제어자를 입력해주면 훨씬 더 쉽게 이용할 수 있다.
+
+```ts
+class Person {
+  private constructor(public name: string, private age: number) {}
+}
+
+const p = new Person("Mark", 39);
+```
+
+### class - Getter & Setter
+
+값을 꺼내오는 것을 `get`, 값을 설정하는 것을 `set`이라고 한다.
+
+```ts
+class Person {
+  private constructor(public name: string, private age: number) {}
+}
+
+const p = new Person("Mark", 39);
+console.log(p.name); // get
+p.name = "Woongjae"; // set
+```
+
+그래서 get을 하는 함수를 `getter`, set을 하는 함수를 `setter`라고 부른다. getter와 setter는 함수지만, 프로퍼티처럼 사용된다. 그래서 동일한 이름일 시, 서로 충돌한다. 프로퍼티 이름에 `_`를 붙여 충돌을 막아주어야 한다.getter에서는 반환값을 통해 변수를 꺼내오고, setter는 매개변수를 받아와서 새로운 값을 할당해주어야 한다. getter와 setter를 사용하면 생성자의 프로퍼티에 접근을 제어하여(private) get과 set함수에서만 프로퍼티를 가져오고 재설정할 수 있도록 만들 수 있다. 이러면 코드를 사용하는 사람이 클래스를 더 안전하게 사용할 수 있도록 만들어준다. 만약 get이 없어지면 값을 찾을 수 없어 undefined가 나오며, set이 없어지면 값을 재설정할 수 없어진다. 개발자는 이를 통해 값을 꺼내오거나 재설정하는 일을 할 수 없음을 알 수 있다.
+
+```ts
+class Person {
+  constructor(private name: string, private age: number) {}
+
+  get name() {
+    console.log("get");
+    return this._name + "Lee";
+  }
+  set name(n: string) {
+    console.log("set");
+    this._name = n;
+  }
+}
+
+const p = new Person("Mark", 39);
+console.log(p.name); // get
+
+p.name = "Woongjae"; // set
+console.log(p.name); // get
+```
+
+### class - readonly properties
+
+`readonly`는 값을 꺼내올 수는 있지만(get), 값을 설정할 수 없도록(set) 만들어준다. 오직 읽기만 가능한 상태로 만든다. 그래서 외부에서 readonly를 재설정하려고 하면 오류가 발생한다. private로 설정된 country의 값도 메소드를 통해 값을 재설정하려 해도 오류가 발생한다.
+
+```ts
+class Person {
+  public readonly name: string = "Mark";
+  private readonly country: string = "Korea";
+
+  constructor(private name: string, private age: number) {}
+
+  hello() {
+    this.country;
+    this.country = "Japen"; // ERROR!
+  }
+}
+p1.name = "Woongjea"; // ERROR!
+```
+
+값이 초기화되지 않아 디폴트 값이 없다면 생성자에서 값을 넣어줄 수 있다. 초기화되는 영역에서는 readonly로 설정되어 있어도 초기화를 위해 사용될 수 있다. 다른 곳에서는 값을 설정해줄 수 없다.
+
+```ts
+class Person {
+  public readonly name: string = "Mark";
+  private readonly country: string;
+
+  constructor(private name: string, private age: number) {
+    this.country = "Korea";
+  }
+  hello() {
+    this.country = "Japen"; // ERROR!
+  }
+}
+```
+
+### class - index signatures in class
+
+반마다 학생의 이름을 받고 성별을 지정해주는 클래스를 만들어보자. 클래스에 반 학생 하나하나 초기화해주는 일은 너무 번거롭다. 학생의 수가 얼마 없다면 금방 끝낼 수 있겠지만, 학생의 수가 너무 많다면 시간도 오래 걸리고 타이핑의 양도 만만치 않다.
+
+```ts
+class Students {
+  mark: string = "male";
+}
+```
+
+이럴 때 `index signatures`를 통해 데이터를 좀 더 손쉽게 다룰 수 있다.
+
+> [index: string] : string;
+
+```ts
+class Students {
+  [index: string]: string;
+}
+
+const a = new Students();
+a.mark = "male";
+a.jade = "male";
+
+console.log(a);
+
+const b = new Students();
+b.chloe = "female";
+b.alex = "male";
+b.anna = "female";
+
+console.log(b);
+```
+
+index signatures에 할당할 값을 제한할 수 있다. 오직 성별만 받도록 변경할 수 있다. 이러면 다른 문자는 할당할 수 없고 male과 female만 할당할 수 있게 된다.
+
+```ts
+class Students {
+  [index: string]: "male" | "female";
+}
+```
+
+### class - static properties & methods
+
+클래스로 부터 만들어진 오브젝트에서 공통적으로 사용하고 싶은 데이터가 있다면 `static`을 설정해주면 된다. static으로 설정된 프로퍼티와 메소드는 오브젝트를 생성해서 사용하는 것이 아닌 클래스 그대로 호출해서 사용할 수 있다.
+
+```ts
+class Person {
+  public static CITY = "Seoul";
+  public static hello() {
+    console.log("안녕하세요");
+  }
+}
+
+const p = new Person();
+p.hello(); // ERROR!
+
+Person.hello();
+Person.CITY;
+```
+
+만약 외부에서 사용을 금지하고 내부에서만 사용하게 만들고 싶다면 `private`를 설정하여 내부에서 사용하면 된다.
+
+```ts
+class Person {
+  public static CITY = "Seoul";
+  public static hello() {
+    console.log("안녕하세요", Person.CITY);
+  }
+}
+```
+
+static으로 설정된 값은 공유된다. 한 번 바뀌면 모든 곳에서 바뀌게 된다. p1에서 change 함수를 통해 CITY의 값을 변경해도 static이기 때문에 p2에서 hello를 출력해도 변경된 값이 출력된다.
+
+```ts
+class Person {
+  public static CITY = "Seoul";
+  hello() {
+    console.log("안녕하세요", Person.CITY);
+  }
+  change() {
+    Person.CITY = "LA";
+  }
+}
+
+const p1 = new Person();
+p1.hello();
+
+const p2 = new Person();
+p2.hello();
+p1.change();
+p2.hello();
+```
+
+### class - singletons(단일 객체 패턴)
+
+`singletons`는 어플리케이션이 실행되는 도중에 클래스로부터 단 하나의 오브젝트만 생성을 해서 사용하는 것이다. 하나의 단일 오브젝트가 공유된다. 우리는 클래스의 이름을 알고 있다면 어디에서든 클래스의 오브젝트를 만들 수 있다. sigletons를 사용하기 위해서는 자유롭게 오브젝트를 만드는 것을 막아야 한다. 방법은 간단하다. constructor를 private로 바꾸어 외부에서 생성하지 못하도록 막으면 된다.
+
+```ts
+class ClassName {
+  private constructor() {}
+}
+```
+
+이제 단일 객체를 만들기 위해서는 오브젝트를 만들어줄 매개체 역할을 해줄 함수가 필요하다. getInstance는 ClassName에서 만들어진 오브젝트가 있으면 그것을 반환하고, 만약 없다면 오브젝트를 만들어 반환한다. a에서는 오브젝트가 만들어져 대입될 것이고, b에서는 만들어진 기존의 오브젝트가 대입될 것이다. 그래서 a와 b의 값은 같다.
+
+```ts
+class ClassName {
+  private static instance: ClassName | null = null;
+
+  public static getInstance(): ClassName {
+    // ClassName으로부터 만든 Object가 없으면 오브젝트를 만들어서 리턴한다.
+    if (ClassName.instance === null) {
+      ClassName.instance = new ClassName();
+    }
+    // ClassName으로부터 만든 Object가 있으면 그것을 리턴한다.
+    return ClassName.instance;
+  }
+
+  private constructor() {}
+}
+
+const a = ClassName.getInstance();
+const b = ClassName.getInstance();
+
+console.log(a === b);
+```
+
+### class - inheritance(상속)
+
+`inheritance(상속)`은 클래스가 다른 클래스의 요소를 가져다 기능을 추가해서 사용하는 것이다. 부모 클래스와 자식 클래스를 만들어 상속해보자. 클래스를 상속하고 싶을 때 `extends`를 사용하면 된다. Chile 클래스는 상속받았다. Parent의 기능을 그대로 갖고 있는 것이다. 생성자가 없어도 Perent에서 사용된 생성자를 그대로 계승받는다. Child 오브젝트를 만들면 쉽게 확인할 수 있다. Parent에 있는 프로퍼티와 함수 모두 Child에서 사용할 수 있다.
+
+> 단, private로 설정된 프로퍼티와 메소드는 사용할 수 없다.
+
+```ts
+class Parent {
+  constructor(protected _name: string, private _age: number) {}
+  public print(): void {
+    console.log(`이름은 ${this.name}, 나이는 ${this.age}입니다.`);
+  }
+}
+
+class Child extends Parent {}
+
+const c = new Child("son", 5);
+c.print();
+```
+
+Child 클래스에 프로퍼티와 메소도를 추가하여서 사용할 수도 있다. 혹은 상속받은 프로퍼티와 메소드, 생성자를 오버라이드할 수 있다. protected 설정이었던 \_name을 Child에서 public으로 변경해보자. Child 클래스의 오브젝트에 한해, \_name은 외부에서 호출될 수 있다.
+
+```ts
+class Parent {
+  constructor(protected _name: string, private _age: number) {}
+  public print(): void {
+    console.log(`이름은 ${this.name}, 나이는 ${this.age}입니다.`);
+  }
+}
+
+class Child extends Parent {
+  public _name = "Mark Jr.";
+  public gender = "male";
+}
+
+const c = new Child("son", 5);
+c._name;
+```
+
+생성자를 오버라이드할 때는 `super` 키워드가 필요하다. super는 부모의 생성자를 호출한다. 생성자의 형식은 부모의 생성자와 동일해야 한다.
+
+```ts
+class Parent {
+  constructor(protected _name: string, private _age: number) {}
+  public print(): void {
+    console.log(`이름은 ${this.name}, 나이는 ${this.age}입니다.`);
+  }
+}
+
+class Child extends Parent {
+  public gender = "male";
+
+  constructor(age: number) {
+    super("Mark Jr.", age);
+  }
+}
+
+const c = new Child("son", 5);
+```
+
+### class - abstract classes
 
 ---
 
