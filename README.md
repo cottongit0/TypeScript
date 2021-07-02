@@ -1959,6 +1959,133 @@ console.log(helloGeneric("Mark").length);
 console.log(helloGeneric(39).length); // ERROR
 ```
 
+## Generics Basic
+
+```ts
+function helloBasic<T>(message: T): T {
+  return message;
+}
+helloBasic<string>("Mark");
+helloBasic(36);
+```
+
+직접 타입을 지정할 때는 지정된 타입으로 체킹하고, 지정하지 않으면 컴파일러가 타입을 추론한다.
+
+```ts
+function helloBasic<T, U>(message: T, comment: U): T {
+  return message;
+}
+helloBasic<string>("Mark", 39);
+helloBasic(36, 39);
+```
+
+## Generics Array & Tuple
+
+```ts
+function helloArray<T>(message: T[]): T {
+  return message[0];
+}
+
+helloArray(["Hello", "World"]);
+helloArray(["Hello", 5]); // Union type
+```
+
+```ts
+function helloTuple<T, K>(message: [T, K]): T {
+  return message[0];
+}
+helloTuple(["Hello", "World"]);
+helloTuple(["Hello", 5]); // Tuple
+```
+
+## Generics Function
+
+```ts
+// Type alias
+type HelloFunctionGeneric1 = <T>(message: T) => T;
+
+const helloFunction1: HelloFunctionGeneric1 = <T>(message: T): T => {
+  return message;
+};
+
+// Interface
+interface HelloFunctionGeneric2 {
+  <T>(message: T): T;
+}
+
+const heeloFunction2: HelloFunctionGeneric2 = <T>(message: T): T => {
+  return message;
+};
+```
+
+## Generics Class
+
+```ts
+class Person<T> {
+  private _name: T;
+
+  constructor(name: T) {
+    this._name = name;
+  }
+}
+
+new Person("Mark");
+new Person<string>("Mark");
+```
+
+```ts
+class Person<T, K> {
+  private _name: T;
+  private _age: K;
+
+  constructor(name: T, age: K) {
+    this._name = name;
+    this._age = age;
+  }
+}
+
+new Person("Mark", 39);
+new Person<string, number>("Mark", 39);
+```
+
+## Generics with extends
+
+```ts
+class PersonExtends<T extends string | number> {
+  // string과 number만 받을 수 있다.
+  private _name: T;
+
+  constructor(name: T) {
+    this._name = name;
+  }
+}
+
+new PersonExtends("Mark");
+new PersonExtends(39);
+```
+
+## keyof & type lookup system
+
+```ts
+interface IPerson {
+  name: string;
+  age: number;
+}
+
+const person: IPerson = {
+  anme: "Mark",
+  age: 39,
+};
+
+function getProp(obj: IPerson, key: "name" | "age") {
+  return obj[key];
+}
+
+function setProp(obj, key, value) {
+  obj[key] = value;
+}
+```
+
 ---
 
 # OOP(Obeject Oriented Programming)
