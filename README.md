@@ -1840,7 +1840,7 @@ const c = new Child("son", 5);
 c._name;
 ```
 
-생성자를 오버라이드할 때는 `super` 키워드가 필요하다. super는 부모의 생성자를 호출한다. 생성자의 형식은 부모의 생성자와 동일해야 한다.
+생성자를 오버라이드할 때는 `super` 키워드가 필요하다. super는 부모의 생성자를 호출한다. 생성자의 형식은 부모의 생성자와 동일해야 한다. Child 클래스에서 age만 받도록 설정한다. 이제 c 오브젝트는 \_name값을 가져올 수 없다. 부모의 생성자를 오버라이드해서 \_name값을 생성하지 못하도록 만들었기 때문이다. 대신 super에서 디폴트 값을 통하여 이름이 출력된다.
 
 ```ts
 class Parent {
@@ -1858,10 +1858,106 @@ class Child extends Parent {
   }
 }
 
-const c = new Child("son", 5);
+const c = new Child(5);
+c.print();
+```
+
+만약 생성자에서 부모의 메소드를 호출하고 싶을 때가 있다. 이때는 반드시 super가 메소드보다 위에 호출되어 있어야 한다.
+
+```ts
+class Parent {
+  constructor(protected _name: string, private _age: number) {}
+  public print(): void {
+    console.log(`이름은 ${this.name}, 나이는 ${this.age}입니다.`);
+  }
+  protected printInfo(): void {
+    console.log(this._name, this.age);
+  }
+}
+
+class Child extends Parent {
+  public gender = "male";
+
+  constructor(age: number) {
+    super("Mark Jr.", age);
+
+    this.printInfo();
+  }
+}
+
+const c = new Child(5);
+c.print();
 ```
 
 ### class - abstract classes
+
+`Abstract class`를 이용하면 완전하지 못한 클래스를 표현할 수 있다. 완전하지 못한 클래스는 오브젝트로 만들 수 없다. 그래서 이 완전하지 못한 클래스를 상속 등을 이용하여 완전하게 만든 다음에 사용할 수 있도록 안내할 수 있다. Abstract class를 만들기 위해서는 class에 `abstract`를 선언해야 한다. 추상화로 선언된 클래스의 프로퍼티 혹은 메소드에 abstract를 붙여주면 불완전한 형태로 클래스를 만들 수 있다. 이 추상화 클래스는 불완전한 형태이기 때문에 new 키워드를 통해 오브젝트를 만들 수 없다.
+
+```ts
+abstract class AbstractPerson {
+  protected _name: string = "Mark";
+
+  abstract setName(name: string): void;
+}
+```
+
+추상화 클래스는 상속을 통해 완전하게 만들 수 있다. 새로운 클래스를 만들어 setName을 완전하게 만들어보자. 불완전했던 기능들을 완전하게 만들어주면 오브젝트를 만들어 기능을 활용할 수 있다.
+
+```ts
+abstract class AbstractPerson {
+  protected _name: string = "Mark";
+
+  abstract setName(name: string): void;
+}
+
+class Person extends AbstractPerson {
+  setName(name: string): void {
+    this._name = name;
+  }
+}
+
+const p = new Person();
+p.setName("Mark");
+```
+
+---
+
+# Generics
+
+## Generics과 Any의 차이
+
+개발하다보면 들어오는 인자와 나가는 리턴값이 일정한 규칙을 이루면서 같은 로직을 반복하는 함수가 있을 수 있다. 이러한 형태의 함수가 여러 번 반복된다고 생각해보자. 그러면 비슷한 규칙의 함수를 여러번 작성해야 한다.
+
+```ts
+function helloString(message: string): string {
+  return message;
+}
+
+function helloNumber(message: number): number {
+  return message;
+}
+```
+
+이런 문제를 해결하기 위해서 모든 타입을 받을 수 있는 인자로 설정하고 모든 타입을 리턴할 수 있는 `any`타입으로 설정해야 한다. 하지만 any를 사용하게 되면 의도와는 다르게 사용될 수 있다. hello라는 함수의 length를 사용해보자. number 타입의 프로퍼티는 length를 사용할 수 없지만, any타입이기 때문에 사용할 수 있다. 이러면 컴파일 타임에서는 오류를 발생시키지 않지만, 런타임에서 오류를 발생하게 된다.
+
+```ts
+function hello(message: any): any {
+  return message;
+}
+console.log(hello("Mark"));
+console.log(hello(39));
+```
+
+이럴 때를 위해 `generic`을 사용할 수 있다. any와 다르게 generic은 받아온 값을 통해 타입을 추론하여 대입한다. 그래서 모든 값을 받아내는 any보다 훨씬 안전하게 사용할 수 있다.
+
+```ts
+function helloGeneric<T>(message: T): T {
+  return message;
+}
+
+console.log(helloGeneric("Mark").length);
+console.log(helloGeneric(39).length); // ERROR
+```
 
 ---
 
